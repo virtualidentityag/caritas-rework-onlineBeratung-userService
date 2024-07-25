@@ -16,12 +16,14 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /** Service to trigger deletion of anonymous users. */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class DeleteUserAnonymousService {
 
@@ -44,6 +46,7 @@ public class DeleteUserAnonymousService {
 
   private List<DeletionWorkflowError> deleteAnonymousUsersWithOverdueSessions() {
     List<Session> doneSessions = this.sessionRepository.findByStatus(SessionStatus.DONE);
+    log.info("Found {} done sessions", doneSessions.size());
     LocalDateTime deletionTime = LocalDateTime.now().minusMinutes(deletionPeriodMinutes);
 
     Set<User> usersWithoutOpenSessions =
@@ -51,7 +54,7 @@ public class DeleteUserAnonymousService {
             .filter(sessionUsersHavingAllSessionsDoneAndOverdue(deletionTime))
             .map(Session::getUser)
             .collect(Collectors.toSet());
-
+    log.info("User without open session {} ", usersWithoutOpenSessions.size());
     return usersWithoutOpenSessions.stream()
         .map(deleteUserAccountService::performUserDeletion)
         .flatMap(Collection::stream)

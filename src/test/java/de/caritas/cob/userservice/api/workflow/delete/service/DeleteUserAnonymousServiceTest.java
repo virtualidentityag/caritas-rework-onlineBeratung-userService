@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class DeleteUserAnonymousServiceTest {
 
   private static final int DELETION_PERIOD_MINUTES = 1200;
@@ -168,6 +170,7 @@ class DeleteUserAnonymousServiceTest {
 
   @Test
   void deleteInactiveAnonymousUsers_Should_sendErrorMails_When_someActionsFail() {
+    log.info("Test deleteInactiveAnonymousUsers_Should_sendErrorMails_When_someActionsFail");
     User user = new User();
     Set<Session> userSessions =
         Set.of(createSessionForUser(user, createOverdueUpdateDates().get(0), SessionStatus.DONE));
