@@ -12,6 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,17 +46,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
-public class NewMessageEmailSupplierTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class NewMessageEmailSupplierTest {
 
   private NewMessageEmailSupplier newMessageEmailSupplier;
 
@@ -77,12 +81,12 @@ public class NewMessageEmailSupplierTest {
 
   @Mock private ReleaseToggleService releaseToggleService;
 
-  @Before
-  public void setup() {
+  @BeforeEach
+  void setup() {
     this.newMessageEmailSupplier =
         NewMessageEmailSupplier.builder()
             .session(session)
-            .rcGroupId("feedbackGroupId")
+            .rcGroupId("groupId")
             .roles(roles)
             .userId(USER.getUserId())
             .consultantAgencyService(consultantAgencyService)
@@ -97,14 +101,14 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyList_When_NoUserRoleIsAvailable() {
+  void generateEmails_Should_ReturnEmptyList_When_NoUserRoleIsAvailable() {
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
   }
 
   @Test
-  public void
+  void
       generateEmails_Should_ReturnEmptyListAndLogError_When_UserRoleIsUserAndSessionIsNotValidAndMessageIsNotTheFirst() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     User userAnotherId = mock(User.class);
@@ -119,7 +123,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void
+  void
       generateEmails_Should_ReturnEmptyListAndNotLogError_When_UserRoleIsUserAndSessionIsNotValidAndMessageIsTheFirst() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     when(session.getUser()).thenReturn(USER);
@@ -131,7 +135,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void
+  void
       generateEmails_Should_ReturnEmptyList_When_UserRoleIsUserAndSessionIsValidAndMessageAndNoDependentConsultantsExists() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     when(session.getUser()).thenReturn(USER);
@@ -144,8 +148,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void
-      generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsNoTeamSession() {
+  void generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsNoTeamSession() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     User user = mock(User.class);
     when(user.getUserId()).thenReturn(USER.getUserId());
@@ -173,8 +176,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void
-      generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsTeamSession() {
+  void generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsTeamSession() {
     ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
     NewMessageDTO newMessageDTO = new NewMessageDTO().allTeamConsultants(true);
     TeamSessionsDTO teamSessionsDTO = new TeamSessionsDTO().newMessage(newMessageDTO);
@@ -209,7 +211,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void
+  void
       generateEmails_Should_ReturnEmptyListAndLogError_When_UserRoleIsConsultantAndAskerHasNoMailAddress() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     User user = Mockito.mock(User.class);
@@ -223,7 +225,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyList_When_UserMailIsDummy() {
+  void generateEmails_Should_ReturnEmptyList_When_UserMailIsDummy() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     User user = mock(User.class);
     when(user.getEmail()).thenReturn("email@dummySuffix");
@@ -235,7 +237,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmailToConsultant_When_NewChatMessageToggleIsOn() {
+  void generateEmails_Should_ReturnEmailToConsultant_When_NewChatMessageToggleIsOn() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     when(session.getConsultant()).thenReturn(CONSULTANT);
     when(session.getUser()).thenReturn(USER);
@@ -247,7 +249,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnNoEmailToConsultant_When_NewChatMessageToggleIsOff() {
+  void generateEmails_Should_ReturnNoEmailToConsultant_When_NewChatMessageToggleIsOff() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     Consultant consultant = mock(Consultant.class);
     when(consultant.getNotifyNewChatMessageFromAdviceSeeker()).thenReturn(false);
@@ -262,7 +264,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmailToConsultant_When_ConsultantIsOffline() {
+  void generateEmails_Should_ReturnEmailToConsultant_When_ConsultantIsOffline() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     when(session.getConsultant()).thenReturn(CONSULTANT);
     when(session.getUser()).thenReturn(USER);
@@ -275,7 +277,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnNoEmailToConsultant_When_ConsultantIsOnline() {
+  void generateEmails_Should_ReturnNoEmailToConsultant_When_ConsultantIsOnline() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     when(session.getConsultant()).thenReturn(CONSULTANT);
     when(session.getUser()).thenReturn(USER);
@@ -288,8 +290,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void
-      generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiver() {
+  void generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiver() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     Consultant consultant = mock(Consultant.class);
     when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
@@ -315,7 +316,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedEmailToAdviceSeeker_When_AdviceSeekerIsOffline() {
+  void generateEmails_Should_ReturnExpectedEmailToAdviceSeeker_When_AdviceSeekerIsOffline() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     Consultant consultant = mock(Consultant.class);
     when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
@@ -330,7 +331,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedEmailToAdviceSeeker_When_AdviceSeekerIsOnline() {
+  void generateEmails_Should_ReturnExpectedEmailToAdviceSeeker_When_AdviceSeekerIsOnline() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     when(session.getUser()).thenReturn(USER);
     when(messageClient.isLoggedIn(any())).thenReturn(Optional.of(true));
@@ -341,7 +342,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void
+  void
       generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiverMultiTenancy() {
     // given
     givenCurrentTenantDataIsSet();
@@ -367,16 +368,20 @@ public class NewMessageEmailSupplierTest {
     TenantContext.clear();
   }
 
-  @Test(expected = InternalServerErrorException.class)
-  public void generateEmails_Should_ThrowInternalServerException_When_ConsultantIsNotFound() {
-    when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
-    Consultant consultant = mock(Consultant.class);
-    when(session.getConsultant()).thenReturn(consultant);
-    when(consultant.getId()).thenReturn(CONSULTANT_ID);
-    when(session.getUser()).thenReturn(USER);
-    when(consultantService.getConsultant(USER.getUserId())).thenReturn(Optional.empty());
+  @Test
+  void generateEmails_Should_ThrowInternalServerException_When_ConsultantIsNotFound() {
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
+          Consultant consultant = mock(Consultant.class);
+          when(session.getConsultant()).thenReturn(consultant);
+          when(consultant.getId()).thenReturn(CONSULTANT_ID);
+          when(session.getUser()).thenReturn(USER);
+          when(consultantService.getConsultant(USER.getUserId())).thenReturn(Optional.empty());
 
-    this.newMessageEmailSupplier.generateEmails();
+          this.newMessageEmailSupplier.generateEmails();
+        });
   }
 
   private void givenCurrentTenantDataIsSet() {

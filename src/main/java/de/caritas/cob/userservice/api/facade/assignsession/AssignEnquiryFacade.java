@@ -50,7 +50,6 @@ public class AssignEnquiryFacade {
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
    * consultants from the Rocket.Chat group which don't have the right to view this session anymore.
-   * Furthermore add the given {@link Consultant} to the feedback group if needed.
    *
    * <p>If the statistics function is enabled, the assignment of the enquired is processed as
    * statistical event.
@@ -129,9 +128,6 @@ public class AssignEnquiryFacade {
     return () -> {
       tenantContextProvider.setCurrentTenantContextIfMissing(currentTenantId);
       updateRocketChatRooms(session.getGroupId(), session, consultant);
-      if (session.hasFeedbackChat()) {
-        updateRocketChatRooms(session.getFeedbackGroupId(), session, consultant);
-      }
       return null;
     };
   }
@@ -140,9 +136,6 @@ public class AssignEnquiryFacade {
     try {
       var memberList = this.rocketChatFacade.retrieveRocketChatMembers(rcGroupId);
       removeUnauthorizedMembers(rcGroupId, session, consultant, memberList);
-      if (session.hasFeedbackChat()) {
-        this.rocketChatFacade.addUserToRocketChatGroup(consultant.getRocketChatId(), rcGroupId);
-      }
       this.rocketChatFacade.removeSystemMessagesFromRocketChatGroup(rcGroupId);
 
     } catch (Exception e) {
@@ -163,10 +156,7 @@ public class AssignEnquiryFacade {
             .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat));
 
     if (rcGroupId.equalsIgnoreCase(session.getGroupId())) {
-      rocketChatRemoveFromGroupOperationService.removeFromGroup();
-    }
-    if (rcGroupId.equalsIgnoreCase(session.getFeedbackGroupId())) {
-      rocketChatRemoveFromGroupOperationService.removeFromFeedbackGroup();
+      rocketChatRemoveFromGroupOperationService.removeFromGroupAndIgnoreGroupNotFound();
     }
   }
 
