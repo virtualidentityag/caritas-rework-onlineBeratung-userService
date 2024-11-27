@@ -28,19 +28,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
+import de.caritas.cob.userservice.api.model.NewSessionValidationConstraint;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import java.util.List;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +57,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-public class CreateSessionFacadeTest {
+class CreateSessionFacadeTest {
 
   @InjectMocks private CreateSessionFacade createSessionFacade;
   @Mock private SessionService sessionService;
@@ -62,6 +66,11 @@ public class CreateSessionFacadeTest {
   @Mock private RollbackFacade rollbackFacade;
   @Mock private UserAccountService userAccountProvider;
   @Mock private Logger logger;
+
+  @Mock private ConsultantAgencyRepository consultantAgencyRepository;
+
+  List<NewSessionValidationConstraint> validationConstraints =
+      Lists.newArrayList(NewSessionValidationConstraint.ONE_SESSION_PER_CONSULTING_TYPE);
 
   @BeforeEach
   public void setup() {
@@ -72,12 +81,12 @@ public class CreateSessionFacadeTest {
   @Test
   public void createUserSession_Should_ReturnConflict_When_AlreadyRegisteredToConsultingType() {
     assertThrows(
-        ConflictException.class,
+        CustomValidationHttpStatusException.class,
         () -> {
           when(sessionService.getSessionsForUserByConsultingTypeId(any(), anyInt()))
               .thenReturn(SESSION_LIST);
           createSessionFacade.createUserSession(
-              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT, validationConstraints);
 
           verify(sessionService, times(0)).saveSession(any());
         });
@@ -96,7 +105,7 @@ public class CreateSessionFacadeTest {
               .thenThrow(new InternalServerErrorException(MESSAGE));
 
           createSessionFacade.createUserSession(
-              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT, validationConstraints);
 
           verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
           verify(rollbackFacade, times(1)).rollBackUserAccount(any());
@@ -119,7 +128,7 @@ public class CreateSessionFacadeTest {
               .saveSessionData(any(Session.class), any());
 
           createSessionFacade.createUserSession(
-              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT, validationConstraints);
 
           verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
           verify(sessionService, times(1)).deleteSession(any());
@@ -138,7 +147,7 @@ public class CreateSessionFacadeTest {
           when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(null);
 
           createSessionFacade.createUserSession(
-              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT, validationConstraints);
         });
   }
 
@@ -152,7 +161,8 @@ public class CreateSessionFacadeTest {
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result =
-        createSessionFacade.createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        createSessionFacade.createUserSession(
+            USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT, validationConstraints);
 
     assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
   }
@@ -167,7 +177,8 @@ public class CreateSessionFacadeTest {
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result =
-        createSessionFacade.createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        createSessionFacade.createUserSession(
+            USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT, validationConstraints);
 
     assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
     verify(sessionDataService, times(1)).saveSessionData(any(Session.class), any());

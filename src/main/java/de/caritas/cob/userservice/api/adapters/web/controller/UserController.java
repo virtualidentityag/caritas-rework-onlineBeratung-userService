@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static de.caritas.cob.userservice.api.model.NewSessionValidationConstraint.ONE_SESSION_PER_CONSULTING_TYPE;
+import static de.caritas.cob.userservice.api.model.NewSessionValidationConstraint.ONE_SESSION_PER_TOPIC_ID_AND_AGENCY_ID;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -57,7 +59,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.AssignChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
-import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
+import de.caritas.cob.userservice.api.facade.CreateNewSessionFacade;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
@@ -153,7 +155,7 @@ public class UserController implements UsersApi {
   private final @NotNull StopChatFacade stopChatFacade;
   private final @NotNull GetChatMembersFacade getChatMembersFacade;
   private final @NotNull CreateUserFacade createUserFacade;
-  private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
+  private final @NotNull CreateNewSessionFacade createNewSessionFacade;
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
   private final @NotNull SessionArchiveService sessionArchiveService;
@@ -235,10 +237,40 @@ public class UserController implements UsersApi {
         RocketChatCredentials.builder().rocketChatToken(rcToken).rocketChatUserId(rcUserId).build();
 
     var registrationResponse =
-        createNewConsultingTypeFacade.initializeNewConsultingType(
-            newRegistrationDto, user, rocketChatCredentials);
+        createNewSessionFacade.initializeNewSession(
+            newRegistrationDto,
+            user,
+            rocketChatCredentials,
+            Lists.newArrayList(ONE_SESSION_PER_CONSULTING_TYPE));
 
     return new ResponseEntity<>(registrationResponse, registrationResponse.getStatus());
+  }
+
+  /**
+   * Creates a new session or chat-agency relation depending on the provided topic.
+   *
+   * @param rcToken Rocket.Chat token (required)
+   * @param rcUserId Rocket.Chat user ID (required)
+   * @param newRegistrationDto {@link NewRegistrationDto}
+   * @return {@link ResponseEntity} containing {@link NewRegistrationResponseDto}
+   */
+  @Override
+  public ResponseEntity<NewRegistrationResponseDto> registerNewSession(
+      @RequestHeader String rcToken,
+      @RequestHeader(value = "RCUserId", required = true) String rcUserId,
+      de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationDto newRegistrationDto) {
+    var user = this.userAccountProvider.retrieveValidatedUser();
+    var rocketChatCredentials =
+        RocketChatCredentials.builder().rocketChatToken(rcToken).rocketChatUserId(rcUserId).build();
+
+    var response =
+        createNewSessionFacade.initializeNewSession(
+            newRegistrationDto,
+            user,
+            rocketChatCredentials,
+            Lists.newArrayList(ONE_SESSION_PER_TOPIC_ID_AND_AGENCY_ID));
+
+    return new ResponseEntity<>(response, response.getStatus());
   }
 
   /**
