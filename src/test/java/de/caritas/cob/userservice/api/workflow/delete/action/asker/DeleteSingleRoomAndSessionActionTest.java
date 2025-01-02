@@ -84,8 +84,8 @@ class DeleteSingleRoomAndSessionActionTest {
     this.deleteSingleRoomAndSessionAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
-    assertThat(workflowErrors, hasSize(3));
-    verify(logger, times(3)).error(anyString(), any(Exception.class));
+    assertThat(workflowErrors, hasSize(4));
+    verify(logger, times(4)).error(anyString(), any(Exception.class));
   }
 
   @Test
@@ -100,8 +100,8 @@ class DeleteSingleRoomAndSessionActionTest {
     this.deleteSingleRoomAndSessionAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
-    assertThat(workflowErrors, hasSize(1));
-    verify(logger, times(1)).error(anyString(), any(RocketChatDeleteGroupException.class));
+    assertThat(workflowErrors, hasSize(2));
+    verify(logger, times(2)).error(anyString(), any(RocketChatDeleteGroupException.class));
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(ASKER));
     assertThat(workflowErrors.get(0).getDeletionTargetType(), is(ROCKET_CHAT));
     assertThat(workflowErrors.get(0).getIdentifier(), is(session.getGroupId()));
