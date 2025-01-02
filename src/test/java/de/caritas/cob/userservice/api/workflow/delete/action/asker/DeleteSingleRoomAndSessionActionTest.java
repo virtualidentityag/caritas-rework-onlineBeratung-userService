@@ -63,7 +63,7 @@ class DeleteSingleRoomAndSessionActionTest {
 
     assertThat(workflowErrors, hasSize(0));
     verifyNoMoreInteractions(this.logger);
-    verify(this.rocketChatService, times(1)).deleteGroupAsTechnicalUser(any());
+    verify(this.rocketChatService, times(2)).deleteGroupAsTechnicalUser(any());
     verify(this.sessionDataRepository, times(1)).findBySessionId(session.getId());
     verify(this.sessionDataRepository, times(1)).deleteAll(any());
     verify(this.sessionRepository, times(1)).delete(session);
