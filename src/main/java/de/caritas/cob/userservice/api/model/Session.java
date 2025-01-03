@@ -153,6 +153,9 @@ public class Session implements TenantAware {
   @Column(name = "rc_group_id")
   private String groupId;
 
+  @Column(name = "rc_feedback_group_id")
+  private String feedbackGroupId;
+
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "session")
   @Exclude
   private List<SessionData> sessionData;
