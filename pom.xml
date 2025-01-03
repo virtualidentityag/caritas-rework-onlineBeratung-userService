@@ -27,7 +27,7 @@
 		<skip.integration-tests>false</skip.integration-tests>
 		<keycloak.version>17.0.0</keycloak.version>
 		<springfox.version>2.9.2</springfox.version>
-		<powermock.version>2.0.2</powermock.version>
+		<powermock.version>2.0.9</powermock.version>
 		<adapters.web.generated.path>
 			${project.groupId}.${project.artifactId}.generated.api.adapters.web
 		</adapters.web.generated.path>
