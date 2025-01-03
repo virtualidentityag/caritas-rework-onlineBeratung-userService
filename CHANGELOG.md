@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v3.1.0...v3.1.1) (2025-01-03)
+
+
+### Bug Fixes
+
+* CARITAS-372 ([3a5742c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3a5742cbd1e11f5ac72812eae3a9c3942745685d))
+* CARITAS-372 ([f4a9175](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f4a91756cf3b16f508eae9616cec1b36fb2bee0f))
+* CARITAS-372 ([98d311c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/98d311c7e779aa3770f9ecdd7c5c71ba5095f0c3))
+* CARITAS-372 ([5cb16fc](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/5cb16fc5f183ff011e73d20f8f9b37b2790cb7c9))
+* deletion routine changes ([d5a0030](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d5a003014d8a5f78a50230d55f2b8b76064589c1))
+* update download artifact version to v4 ([1012ef1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1012ef1ef6491251eaaa8203ff84745ee98f42d5))
+* update upload artifact version to v4 ([6fd1c9a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6fd1c9a67329b8e4869eb0008f89b89945f54687))
+
 ## [3.1.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v3.0.0...v3.1.0) (2024-12-20)
 
 
