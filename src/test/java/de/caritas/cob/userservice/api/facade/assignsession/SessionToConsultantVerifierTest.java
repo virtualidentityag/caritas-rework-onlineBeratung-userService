@@ -1,8 +1,5 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
-import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -12,12 +9,10 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.User;
 import org.assertj.core.api.Fail;
-import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -126,46 +121,6 @@ class SessionToConsultantVerifierTest {
 
     assertThrows(
         InternalServerErrorException.class,
-        () -> sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO));
-  }
-
-  @Test
-  void verifyPreconditionsForAssignment_Should_notThrowException_When_anonymousSessionIsValid() {
-    Session session = new EasyRandom().nextObject(Session.class);
-    session.setConsultant(null);
-    session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
-    session.setRegistrationType(RegistrationType.ANONYMOUS);
-    ConsultantAgency u25ConsultantAgency = mock(ConsultantAgency.class);
-    ConsultantAgency otherConsultantAgency = mock(ConsultantAgency.class);
-    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
-    consultant.setConsultantAgencies(asSet(u25ConsultantAgency, otherConsultantAgency));
-
-    ConsultantSessionDTO consultantSessionDTO =
-        ConsultantSessionDTO.builder().consultant(consultant).session(session).build();
-
-    assertDoesNotThrow(
-        () -> sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO));
-  }
-
-  @Test
-  void
-      verifyPreconditionsForAssignment_Should_throwException_When_anonymousSessionHasNotConsultingType() {
-    Session session = new EasyRandom().nextObject(Session.class);
-    session.setConsultant(null);
-    session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
-    session.setRegistrationType(RegistrationType.ANONYMOUS);
-    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
-    consultant.setConsultantAgencies(null);
-
-    when(sessionToConsultantConditionProvider.isSessionsConsultingTypeNotAvailableForConsultant(
-            any(), any()))
-        .thenReturn(true);
-
-    ConsultantSessionDTO consultantSessionDTO =
-        ConsultantSessionDTO.builder().consultant(consultant).session(session).build();
-
-    assertThrows(
-        ForbiddenException.class,
         () -> sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO));
   }
 

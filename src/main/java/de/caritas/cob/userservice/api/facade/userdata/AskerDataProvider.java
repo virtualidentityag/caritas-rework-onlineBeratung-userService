@@ -64,7 +64,6 @@ public class AskerDataProvider {
             .userRoles(authenticatedUser.getRoles())
             .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
             .consultingTypes(getConsultingTypes(user))
-            .hasAnonymousConversations(false)
             .hasArchive(false)
             .dataPrivacyConfirmation(user.getDataPrivacyConfirmation())
             .termsAndConditionsConfirmation(user.getTermsAndConditionsConfirmation())

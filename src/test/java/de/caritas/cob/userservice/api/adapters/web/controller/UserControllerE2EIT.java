@@ -287,7 +287,7 @@ class UserControllerE2EIT {
   }
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     when(agencyServiceApiControllerFactory.createControllerApi())
         .thenReturn(
             new TestAgencyControllerApi(
@@ -344,7 +344,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
         .andExpect(jsonPath("consultingTypes", is(nullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(true)))
         .andExpect(jsonPath("hasArchive", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
@@ -399,7 +398,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
         .andExpect(jsonPath("consultingTypes", is(notNullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(false)))
         .andExpect(jsonPath("hasArchive", is(false)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
@@ -462,7 +460,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
         .andExpect(jsonPath("consultingTypes", is(nullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(true)))
         .andExpect(jsonPath("hasArchive", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
@@ -517,7 +514,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
         .andExpect(jsonPath("consultingTypes", is(notNullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(false)))
         .andExpect(jsonPath("hasArchive", is(false)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
@@ -731,7 +727,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
         .andExpect(jsonPath("consultingTypes", is(nullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(true)))
         .andExpect(jsonPath("hasArchive", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(false)))
@@ -796,7 +791,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
         .andExpect(jsonPath("consultingTypes", is(notNullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(false)))
         .andExpect(jsonPath("hasArchive", is(false)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(false)))

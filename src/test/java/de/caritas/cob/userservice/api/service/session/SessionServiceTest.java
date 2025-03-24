@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.service.session;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_LIST;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_SUCHT;
@@ -205,7 +204,7 @@ class SessionServiceTest {
   private final EasyRandom easyRandom = new EasyRandom();
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     CONSULTANT_AGENCY_SET.add(CONSULTANT_AGENCY_1);
     setInternalState(LogService.class, "LOGGER", logger);
   }
@@ -736,25 +735,6 @@ class SessionServiceTest {
 
   @Test
   void
-      getAllowedSessionsByConsultantAndGroupIds_should_find_new_anonymous_enquiry_if_consultant_may_advise_consulting_type() {
-    Session anonymousEnquiry =
-        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
-    when(sessionRepository.findByGroupIds(singleton("rcGroupId")))
-        .thenReturn(singletonList(anonymousEnquiry));
-    when(agencyService.getAgencies(singletonList(4711L))).thenReturn(AGENCY_DTO_LIST);
-    ConsultantAgency agency = new ConsultantAgency();
-    agency.setAgencyId(4711L);
-    var consultant = createConsultantWithAgencies(agency);
-
-    var sessionResponse =
-        sessionService.getAllowedSessionsByConsultantAndGroupIds(
-            consultant, singleton("rcGroupId"), singleton(UserRole.CONSULTANT.getValue()));
-
-    assertEquals(1, sessionResponse.size());
-  }
-
-  @Test
-  void
       getAllowedSessionsByConsultantAndGroupIds_should_only_return_the_sessions_the_consultant_can_see() {
     // given
     List<Session> sessions = new ArrayList<>();
@@ -775,100 +755,53 @@ class SessionServiceTest {
   }
 
   @Test
-  void
-      getSessionsByIds_should_find_new_anonymous_enquiry_if_consultant_may_advise_consulting_type() {
-    Session anonymousEnquiry =
-        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
-    when(sessionRepository.findAllById(singleton(anonymousEnquiry.getId())))
-        .thenReturn(singletonList(anonymousEnquiry));
-    when(agencyService.getAgencies(singletonList(4711L))).thenReturn(AGENCY_DTO_LIST);
-    ConsultantAgency agency = new ConsultantAgency();
-    agency.setAgencyId(4711L);
-    var consultant = createConsultantWithAgencies(agency);
-
-    var sessionResponse =
-        sessionService.getSessionsByIds(
-            consultant,
-            singleton(anonymousEnquiry.getId()),
-            singleton(UserRole.CONSULTANT.getValue()));
-
-    assertEquals(1, sessionResponse.size());
-  }
-
-  @Test
-  void getSessionsByUserAndGroupIds_should_find_session_for_anonymous_user_of_session() {
-    Session anonymousEnquiry =
-        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
-    anonymousEnquiry.setUser(USER);
-    when(sessionRepository.findByGroupIds(singleton("rcGroupId")))
-        .thenReturn(singletonList(anonymousEnquiry));
-
-    var sessionResponse = getSessionsByUserAndGroupIds(USER_ID);
-
-    assertEquals(1, sessionResponse.size());
-  }
-
-  @Test
   void getSessionsByUserAndGroupIds_should_fail_if_user_is_not_owner_of_session() {
-    Session anonymousEnquiry =
-        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
-    anonymousEnquiry.setUser(USER);
+    Session enquiry =
+        createRegisteredNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
+    enquiry.setUser(USER);
     when(sessionRepository.findByGroupIds(singleton("rcGroupId")))
-        .thenReturn(singletonList(anonymousEnquiry));
+        .thenReturn(singletonList(enquiry));
 
     assertThrows(ForbiddenException.class, () -> getSessionsByUserAndGroupIds("someOtherId"));
   }
 
   private List<UserSessionResponseDTO> getSessionsByUserAndGroupIds(String someOtherId) {
     return sessionService.getSessionsByUserAndGroupIds(
-        someOtherId, singleton("rcGroupId"), singleton(UserRole.ANONYMOUS.getValue()));
-  }
-
-  @Test
-  void getSessionsByUserAndSessionIds_should_find_session_for_anonymous_user_of_session() {
-    Session anonymousEnquiry =
-        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
-    anonymousEnquiry.setUser(USER);
-    when(sessionRepository.findAllById(singleton(anonymousEnquiry.getId())))
-        .thenReturn(singletonList(anonymousEnquiry));
-
-    var sessionResponse = getSomeUserId(USER_ID, anonymousEnquiry);
-
-    assertEquals(1, sessionResponse.size());
+        someOtherId, singleton("rcGroupId"), singleton(UserRole.USER.getValue()));
   }
 
   @Test
   void getSessionsByUserAndSessionIds_should_fail_if_user_is_not_owner_of_session() {
-    Session anonymousEnquiry =
-        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
-    anonymousEnquiry.setUser(USER);
-    when(sessionRepository.findAllById(singleton(anonymousEnquiry.getId())))
-        .thenReturn(singletonList(anonymousEnquiry));
+    Session enquiry =
+        createRegisteredNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
+    enquiry.setUser(USER);
+    when(sessionRepository.findAllById(singleton(enquiry.getId())))
+        .thenReturn(singletonList(enquiry));
 
-    assertThrows(ForbiddenException.class, () -> getSomeUserId("someUserId", anonymousEnquiry));
+    assertThrows(ForbiddenException.class, () -> getSomeUserId("someUserId", enquiry));
   }
 
-  private List<UserSessionResponseDTO> getSomeUserId(String someUserId, Session anonymousEnquiry) {
+  private List<UserSessionResponseDTO> getSomeUserId(String someUserId, Session enquiry) {
     return sessionService.getSessionsByUserAndSessionIds(
-        someUserId, singleton(anonymousEnquiry.getId()), singleton(UserRole.ANONYMOUS.getValue()));
+        someUserId, singleton(enquiry.getId()), singleton(UserRole.USER.getValue()));
   }
 
   private Session giveAllowedSessionWithID(Long id, Consultant consultant) {
     Session allowedSession =
-        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
+        createRegisteredNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
     allowedSession.setId(id);
     allowedSession.setConsultant(consultant);
     return allowedSession;
   }
 
-  private Session createAnonymousNewEnquiryWithConsultingType(int consultingTypeId) {
+  private Session createRegisteredNewEnquiryWithConsultingType(int consultingTypeId) {
     var session = easyRandom.nextObject(Session.class);
     session.setAgencyId(null);
     session.setTeamSession(false);
     session.setConsultant(null);
     session.setConsultingTypeId(consultingTypeId);
     session.setStatus(SessionStatus.NEW);
-    session.setRegistrationType(ANONYMOUS);
+    session.setRegistrationType(REGISTERED);
     return session;
   }
 

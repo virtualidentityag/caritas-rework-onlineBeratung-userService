@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.config.auth;
 
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ANONYMOUS_DEFAULT;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.CONSULTANT_CREATE;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.CONSULTANT_DEFAULT;
@@ -25,7 +24,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum Authority {
-  ANONYMOUS(UserRole.ANONYMOUS, singletonList(ANONYMOUS_DEFAULT)),
   USER(UserRole.USER, List.of(USER_DEFAULT, ASSIGN_CONSULTANT_TO_SESSION)),
   CONSULTANT(
       UserRole.CONSULTANT,
@@ -65,7 +63,6 @@ public enum Authority {
     private AuthorityValue() {}
 
     public static final String PREFIX = "AUTHORIZATION_";
-    public static final String ANONYMOUS_DEFAULT = PREFIX + "ANONYMOUS_DEFAULT";
     public static final String NOTIFICATIONS_TECHNICAL = PREFIX + "NOTIFICATIONS_TECHNICAL";
     public static final String USER_DEFAULT = PREFIX + "USER_DEFAULT";
     public static final String CONSULTANT_DEFAULT = PREFIX + "CONSULTANT_DEFAULT";

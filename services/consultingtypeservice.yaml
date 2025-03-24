@@ -127,6 +127,32 @@ paths:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /consultingtypes/bytenant/{tenantId}/full:
+    get:
+      tags:
+        - consulting-type-controller
+      summary: 'Returns the consulting type with all properties for a given consulting type tenantId'
+      operationId: getFullConsultingTypeByTenantId
+      parameters:
+        - name: tenantId
+          in: path
+          description: consulting type tenantId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/FullConsultingTypeResponseDTO'
+        404:
+          description: NOT FOUND - ConsultingType not found
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
   /consultingtypes/groups:
     get:
       tags:
@@ -147,6 +173,65 @@ paths:
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
 
+  /consultingtypes:
+    post:
+      tags:
+        - consulting-type-controller
+      summary: 'Create a consulting type [Authorization: Role: tenant-admin]'
+      operationId: createConsultingType
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ConsultingTypeDTO'
+        required: true
+      responses:
+        201:
+          description: CREATED - consulting type was created successfully
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/FullConsultingTypeResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /consultingtypes/{id}:
+    patch:
+      tags:
+        - consulting-type-controller
+      summary: 'Updates a consulting type [Authorization: Role: tenant-admin]'
+      operationId: patchConsultingType
+      parameters:
+        - name: id
+          in: path
+          description: ConsultingType ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ConsultingTypePatchDTO'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/FullConsultingTypeResponseDTO'
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        409:
+          description: CONFLICT - unique constraint validation fails
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+
 components:
   schemas:
 
@@ -161,15 +246,15 @@ components:
         id:
           type: integer
           example: 100
+        tenantId:
+          type: integer
+          example: 100
         description:
           type: string
           example: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr."
         furtherInformation:
           allOf:
             - $ref: '#/components/schemas/FurtherInformationDTO'
-        titles:
-          allOf:
-            - $ref: '#/components/schemas/TitlesDTO'
         urls:
           allOf:
             - $ref: '#/components/schemas/UrlsDTO'
@@ -182,10 +267,13 @@ components:
         isSubsequentRegistrationAllowed:
           type: boolean
           example: true
-        isAnonymousConversationAllowed:
-          type: boolean
-          example: false
         showAskerProfile:
+          type: boolean
+          example: true
+        isVideoCallAllowed:
+          type: boolean
+          example: true
+        languageFormal:
           type: boolean
           example: true
 
@@ -198,12 +286,9 @@ components:
             slug:
               type: string
               example: part-of-url
-            languageFormal:
+            excludeNonMainConsultantsFromTeamSessions:
               type: boolean
               example: true
-            lockedAgencies:
-              type: boolean
-              example: false
             whiteSpot:
               allOf:
                 - $ref: '#/components/schemas/WhiteSpotDTO'
@@ -216,9 +301,6 @@ components:
             sendFurtherStepsMessage:
               type: boolean
               example: true
-            sendSaveSessionDataMessage:
-              type: boolean
-              example: false
             sessionDataInitializing:
               allOf:
                 - $ref: '#/components/schemas/SessionDataInitializingDTO'
@@ -234,14 +316,74 @@ components:
         - $ref: '#/components/schemas/ExtendedConsultingTypeResponseDTO'
         - type: object
           properties:
-            voluntaryComponents:
-              type: array
-              items:
-                type: object
             requiredComponents:
               type: object
-            welcomeScreen:
-              $ref: '#/components/schemas/WelcomeScreenDTO'
+
+    ConsultingTypeDTO:
+      type: object
+      properties:
+        tenantId:
+          type: integer
+          example: 100
+        description:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr."
+        groups:
+          type: array
+          items:
+            type: string
+        slug:
+          type: string
+          example: part-of-url
+        excludeNonMainConsultantsFromTeamSessions:
+          type: boolean
+          example: true
+        isSubsequentRegistrationAllowed:
+          type: boolean
+          example: true
+        showAskerProfile:
+          type: boolean
+          example: true
+        isVideoCallAllowed:
+          type: boolean
+          example: true
+        languageFormal:
+          type: boolean
+          example: true
+        consultantBoundedToConsultingType:
+          type: boolean
+          example: false
+        sendFurtherStepsMessage:
+          type: boolean
+          example: true
+        furtherInformation:
+          allOf:
+            - $ref: '#/components/schemas/FurtherInformationDTO'
+        urls:
+          allOf:
+            - $ref: '#/components/schemas/UrlsDTO'
+        registration:
+          allOf:
+            - $ref: '#/components/schemas/RegistrationDTO'
+        groupChat:
+          allOf:
+            - $ref: '#/components/schemas/GroupChatDTO'
+        whiteSpot:
+          allOf:
+            - $ref: '#/components/schemas/WhiteSpotDTO'
+        welcomeMessage:
+          allOf:
+            - $ref: '#/components/schemas/WelcomeMessageDTO'
+        sessionDataInitializing:
+          allOf:
+            - $ref: '#/components/schemas/SessionDataInitializingDTO'
+        roles:
+          $ref: '#/components/schemas/RolesDTO'
+        notifications:
+          allOf:
+            - $ref: '#/components/schemas/NotificationsDTO'
+        requiredComponents:
+          $ref: '#/components/schemas/RequiredComponentsDTO'
 
     FurtherInformationDTO:
       type: object
@@ -252,26 +394,6 @@ components:
         url:
           type: string
           example: "https://www.domain.com"
-
-    TitlesDTO:
-      type: object
-      properties:
-        default:
-          type: string
-          example: "Beratung xyz"
-        short:
-          type: string
-          example: "xyz"
-        long:
-          type: string
-          example: "Beratung xyz in Ort"
-        welcome:
-          type: string
-          example: "Herzlich Willkommen zu Beratung xyz"
-        registrationDropdown:
-          type: string
-          example: "Beratung xyz"
-
     UrlsDTO:
       type: object
       properties:
@@ -355,7 +477,16 @@ components:
     SessionDataInitializingDTO:
       type: object
       properties:
+        addictiveDrugs:
+          type: boolean
+          example: true
         age:
+          type: boolean
+          example: false
+        gender:
+          type: boolean
+          example: true
+        relation:
           type: boolean
           example: false
         state:
@@ -397,21 +528,31 @@ components:
           type: "boolean"
           example: true
 
-    WelcomeScreenDTO:
+    RequiredComponentsDTO:
       type: object
       properties:
-        anonymous:
-          $ref: '#/components/schemas/AnonymousScreenDTO'
+        age:
+          type: object
+          properties:
+            isEnabled:
+              type: boolean
+            options:
+              type: array
+              items:
+                $ref: '#/components/schemas/OptionDTO'
+        state:
+          type: object
+          properties:
+            isEnabled:
+              type: boolean
 
-    AnonymousScreenDTO:
+    OptionDTO:
       type: object
       properties:
-        title:
+        label:
           type: string
-          example: Lorem ipsum
-        text:
+        value:
           type: string
-          example: Lorem ipsum dolor sit amet, consetetur...
 
     ConsultingTypeGroupsResponseDTO:
       type: array
@@ -441,3 +582,25 @@ components:
             default:
               type: string
               example: "Lorem ipsum"
+            long:
+              type: string
+              example: "Lorem ipsum"
+
+    ConsultingTypePatchDTO:
+      type: object
+      properties:
+        isVideoCallAllowed:
+          type: boolean
+          example: true
+        languageFormal:
+          type: boolean
+          example: true
+        sendFurtherStepsMessage:
+          type: boolean
+          example: true
+        welcomeMessage:
+          allOf:
+            - $ref: '#/components/schemas/WelcomeMessageDTO'
+        notifications:
+          allOf:
+            - $ref: '#/components/schemas/NotificationsDTO'

@@ -262,7 +262,7 @@ paths:
         - user-controller
       summary: 'Returns a list of open session(s) for the currently authenticated
         user. Note: Either a session or a chat object is provided. [Authorization:
-        Role: user, anonymous]'
+        Role: user]'
       operationId: getSessionsForAuthenticatedUser
       parameters:
         - name: RCToken
@@ -531,7 +531,7 @@ paths:
       tags:
         - user-controller
       summary: 'Returns user (meta)data for the currently authenticated user [Authorization:
-        Role: user, anonymous, consultant]'
+        Role: user, consultant]'
       operationId: getUserData
       responses:
         200:
@@ -2097,7 +2097,7 @@ components:
           example: false
         registrationType:
           type: string
-          example: ANONYMOUS
+          example: REGISTERED
         createDate:
           type: string
           example: 2021-05-11T15:29:37
@@ -2523,11 +2523,6 @@ components:
           $ref: "#/components/schemas/TwoFactorAuthDTO"
         consultingTypes:
           $ref: "#/components/schemas/ConsultingTypeMap"
-        hasAnonymousConversations:
-          type: boolean
-          example: true
-          description: "Is true if consultant has at least one consulting type containing
-          anonymous conversations active"
         hasArchive:
           type: boolean
           example: true

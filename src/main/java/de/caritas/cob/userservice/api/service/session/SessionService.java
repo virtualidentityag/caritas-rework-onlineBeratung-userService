@@ -487,7 +487,6 @@ public class SessionService {
 
   private void checkForAskerRoles(Set<String> roles) {
     if (!roles.contains(UserRole.USER.getValue())
-        && !roles.contains(UserRole.ANONYMOUS.getValue())
         && !roles.contains(UserRole.CONSULTANT.getValue())) {
       throw new ForbiddenException(
           "No user or consultant role to retrieve sessions", LogService::logForbidden);
@@ -495,10 +494,7 @@ public class SessionService {
   }
 
   private void checkAskerPermissionForSession(Session session, String userId, Set<String> roles) {
-    if ((roles.contains(UserRole.USER.getValue())
-            || session.getRegistrationType() == RegistrationType.ANONYMOUS
-                && roles.contains(UserRole.ANONYMOUS.getValue()))
-        && session.getUser().getUserId().equals(userId)) {
+    if (roles.contains(UserRole.USER.getValue()) && session.getUser().getUserId().equals(userId)) {
       return;
     }
     throw new ForbiddenException(
@@ -533,9 +529,7 @@ public class SessionService {
   }
 
   private void checkConsultantAssignment(Consultant consultant, Session session) {
-    if (session.isAdvisedBy(consultant)
-        || isAllowedToAdvise(consultant, session)
-        || isAnonymousEnquiryAndAllowedToAdviseConsultingType(consultant, session)) {
+    if (session.isAdvisedBy(consultant) || isAllowedToAdvise(consultant, session)) {
       return;
     }
     throw new ForbiddenException(
@@ -547,23 +541,6 @@ public class SessionService {
     return isTeamSessionOrNew(session)
         && session.getAgencyId() != null
         && consultant.isInAgency(session.getAgencyId());
-  }
-
-  private boolean isAnonymousEnquiryAndAllowedToAdviseConsultingType(
-      Consultant consultant, Session session) {
-    if (session.getStatus() != SessionStatus.NEW
-        || session.getRegistrationType() != RegistrationType.ANONYMOUS) {
-      return false;
-    }
-    var agencyIdsOfConsultant =
-        consultant.getConsultantAgencies().stream()
-            .map(ConsultantAgency::getAgencyId)
-            .collect(Collectors.toList());
-    var consultingTypes =
-        agencyService.getAgencies(agencyIdsOfConsultant).stream()
-            .map(AgencyDTO::getConsultingType)
-            .collect(Collectors.toSet());
-    return consultingTypes.contains(session.getConsultingTypeId());
   }
 
   /**

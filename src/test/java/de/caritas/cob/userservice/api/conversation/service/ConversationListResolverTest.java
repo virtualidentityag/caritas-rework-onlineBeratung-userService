@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.conversation.service;
 
-import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
+import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,20 +35,20 @@ class ConversationListResolverTest {
 
   @Test
   void resolveConversations_Should_returnExpectedResponse_When_paramsAreValid() {
-    whenConversationListProviderReturnsAnonymousResponseSessions(
+    whenConversationListProviderReturnsRegisteredSessions(
         List.of(mock(ConsultantSessionResponseDTO.class)));
 
     var responseDTO =
-        this.conversationListResolver.resolveConversations(0, 1, ANONYMOUS_ENQUIRY, "");
+        this.conversationListResolver.resolveConversations(0, 1, REGISTERED_ENQUIRY, "");
 
     assertThat(responseDTO, is(consultantSessionListResponseDTO));
   }
 
-  private void whenConversationListProviderReturnsAnonymousResponseSessions(
+  private void whenConversationListProviderReturnsRegisteredSessions(
       List<ConsultantSessionResponseDTO> responseSessions) {
     when(this.conversationListProvider.buildConversations(any()))
         .thenReturn(this.consultantSessionListResponseDTO);
-    when(this.conversationListProviderRegistry.findByConversationType(ANONYMOUS_ENQUIRY))
+    when(this.conversationListProviderRegistry.findByConversationType(REGISTERED_ENQUIRY))
         .thenReturn(this.conversationListProvider);
     when(this.consultantSessionListResponseDTO.getSessions()).thenReturn(responseSessions);
   }
@@ -57,12 +57,12 @@ class ConversationListResolverTest {
   @NullAndEmptySource
   void resolveConversations_Should_throwException_When_noSessionsAreFound(
       List<ConsultantSessionResponseDTO> emptySessions) {
-    whenConversationListProviderReturnsAnonymousResponseSessions(emptySessions);
+    whenConversationListProviderReturnsRegisteredSessions(emptySessions);
 
     assertThrows(
         NoContentException.class,
         () -> {
-          this.conversationListResolver.resolveConversations(0, 1, ANONYMOUS_ENQUIRY, "");
+          this.conversationListResolver.resolveConversations(0, 1, REGISTERED_ENQUIRY, "");
         });
   }
 }

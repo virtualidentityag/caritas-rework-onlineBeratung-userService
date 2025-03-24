@@ -55,8 +55,7 @@ import org.springframework.lang.Nullable;
 public class Session implements TenantAware {
 
   public enum RegistrationType {
-    REGISTERED,
-    ANONYMOUS
+    REGISTERED
   }
 
   @AllArgsConstructor

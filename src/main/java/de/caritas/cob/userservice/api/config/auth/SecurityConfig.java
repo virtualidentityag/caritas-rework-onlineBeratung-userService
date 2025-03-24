@@ -83,17 +83,13 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .permitAll()
         .antMatchers(
             "/users/askers/new",
-            "/conversations/askers/anonymous/new",
             "/users/consultants/{consultantId:" + UUID_PATTERN + "}",
             "/users/consultants/languages")
         .permitAll()
-        .antMatchers(HttpMethod.GET, "/conversations/anonymous/{sessionId:[0-9]+}")
-        .hasAnyAuthority(ANONYMOUS_DEFAULT)
         .antMatchers("/users/notifications")
         .hasAnyAuthority(NOTIFICATIONS_TECHNICAL)
         .antMatchers("/users/data")
         .hasAnyAuthority(
-            ANONYMOUS_DEFAULT,
             USER_DEFAULT,
             CONSULTANT_DEFAULT,
             SINGLE_TENANT_ADMIN,
@@ -102,7 +98,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers(HttpMethod.GET, APPOINTMENTS_APPOINTMENT_ID + UUID_PATTERN + "}")
         .permitAll()
         .antMatchers("/users/sessions/askers")
-        .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT)
+        .hasAnyAuthority(USER_DEFAULT)
         .antMatchers(
             "/users/email",
             "/users/mails/messages/new",
@@ -142,9 +138,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/sessions/{sessionId:[0-9]+}/data")
         .hasAuthority(USER_DEFAULT)
         .regexMatchers(HttpMethod.GET, "/users/sessions/room\\?rcGroupIds=[\\dA-Za-z-,]+")
-        .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT)
+        .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers(HttpMethod.GET, "/users/sessions/room/{sessionId:[0-9]+}")
-        .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT)
+        .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers(HttpMethod.GET, "/users/chat/room/{chatId:[0-9]+}")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers(
@@ -154,11 +150,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/consultants/absences",
             "/users/sessions/consultants",
             "/users/sessions/teams",
-            "/conversations/askers/anonymous/{sessionId:[0-9]+}/accept",
             "/conversations/consultants/**")
         .hasAuthority(CONSULTANT_DEFAULT)
-        .antMatchers("/conversations/anonymous/{sessionId:[0-9]+}/finish")
-        .hasAnyAuthority(CONSULTANT_DEFAULT, ANONYMOUS_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/consultant/{consultantId:[0-9A-Za-z-]+}")
         .hasAnyAuthority(ASSIGN_CONSULTANT_TO_ENQUIRY, ASSIGN_CONSULTANT_TO_SESSION)
         .antMatchers("/users/consultants")
@@ -170,7 +163,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/sessions/rocketChatGroupId")
         .hasAuthority(TECHNICAL_DEFAULT)
         .antMatchers("/liveproxy/send")
-        .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT, ANONYMOUS_DEFAULT)
+        .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/messages/key")
         .hasAuthority(TECHNICAL_DEFAULT)
         .antMatchers("/users/chat/new", "/users/chat/v2/new")
