@@ -87,14 +87,12 @@ public class Session implements TenantAware {
       int consultingTypeId,
       @NonNull String postcode,
       Long agencyId,
-      @NonNull SessionStatus status,
-      boolean teamSession) {
+      @NonNull SessionStatus status) {
     this.user = user;
     this.consultingTypeId = consultingTypeId;
     this.postcode = postcode;
     this.agencyId = agencyId;
     this.status = status;
-    this.teamSession = teamSession;
     this.registrationType = RegistrationType.REGISTERED;
   }
 
@@ -158,9 +156,6 @@ public class Session implements TenantAware {
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "session")
   @Exclude
   private List<SessionData> sessionData;
-
-  @Column(name = "is_team_session", columnDefinition = "tinyint(4) default '0'")
-  private boolean teamSession;
 
   @Column(nullable = false, columnDefinition = "bit default false")
   private Boolean isConsultantDirectlySet;

@@ -55,6 +55,7 @@ import de.caritas.cob.userservice.api.service.archive.SessionDeleteService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
+import de.caritas.cob.userservice.api.testHelper.TestConstants;
 import java.util.*;
 import javax.servlet.http.Cookie;
 import lombok.val;
@@ -90,7 +91,7 @@ class UserControllerIT {
 
   private final String VALID_ENQUIRY_MESSAGE_BODY = "{\"message\": \"" + MESSAGE + "\"}";
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
-  private final Consultant TEAM_CONSULTANT =
+  private final Consultant CONSULTANT =
       new Consultant(
           CONSULTANT_ID,
           ROCKETCHAT_ID,
@@ -98,7 +99,6 @@ class UserControllerIT {
           "first name",
           "last name",
           "consultant@cob.de",
-          false,
           true,
           "",
           false,
@@ -133,8 +133,7 @@ class UserControllerIT {
           .postcode(POSTCODE)
           .groupId(RC_GROUP_ID)
           .askerRcId(RC_USER_ID)
-          .messageDate(MESSAGE_DATE)
-          .isTeamSession(IS_NO_TEAM_SESSION);
+          .messageDate(MESSAGE_DATE);
   private final AgencyDTO AGENCY_DTO =
       new AgencyDTO()
           .id(AGENCY_ID)
@@ -142,7 +141,6 @@ class UserControllerIT {
           .postcode(POSTCODE)
           .city(CITY)
           .description(DESCRIPTION)
-          .teamAgency(false)
           .offline(false)
           .consultingType(CONSULTING_TYPE_ID_SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
@@ -159,7 +157,7 @@ class UserControllerIT {
       Session.builder()
           .id(SESSION_ID)
           .user(USER)
-          .consultant(TEAM_CONSULTANT)
+          .consultant(CONSULTANT)
           .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
           .registrationType(REGISTERED)
           .agencyId(AGENCY_ID)
@@ -169,7 +167,6 @@ class UserControllerIT {
           .status(SessionStatus.IN_PROGRESS)
           .createDate(nowInUtc())
           .updateDate(nowInUtc())
-          .teamSession(false)
           .build();
 
   private final Session SESSION_WITHOUT_CONSULTANT =
@@ -185,31 +182,13 @@ class UserControllerIT {
           .status(SessionStatus.NEW)
           .createDate(nowInUtc())
           .updateDate(nowInUtc())
-          .teamSession(false)
           .build();
 
-  private final Session TEAM_SESSION =
+  private final Session SESSION_WITHOUT_GROUP_ID =
       Session.builder()
           .id(SESSION_ID)
           .user(USER)
-          .consultant(TEAM_CONSULTANT)
-          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
-          .registrationType(REGISTERED)
-          .agencyId(AGENCY_ID)
-          .enquiryMessageDate(nowInUtc())
-          .groupId(RC_GROUP_ID)
-          .postcode(POSTCODE)
-          .status(SessionStatus.IN_PROGRESS)
-          .createDate(nowInUtc())
-          .updateDate(nowInUtc())
-          .teamSession(true)
-          .build();
-
-  private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
-      Session.builder()
-          .id(SESSION_ID)
-          .user(USER)
-          .consultant(TEAM_CONSULTANT)
+          .consultant(CONSULTANT)
           .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
           .registrationType(REGISTERED)
           .agencyId(AGENCY_ID)
@@ -218,7 +197,6 @@ class UserControllerIT {
           .status(SessionStatus.IN_PROGRESS)
           .createDate(nowInUtc())
           .updateDate(nowInUtc())
-          .teamSession(true)
           .build();
 
   private final ConsultantResponseDTO CONSULTANT_RESPONSE_DTO =
@@ -732,7 +710,7 @@ class UserControllerIT {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.empty());
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
 
     mvc.perform(
             put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
@@ -748,10 +726,9 @@ class UserControllerIT {
   void acceptEnquiry_Should_ReturnInternalServerError_WhenSessionHasNoRocketChatGroupId()
       throws Exception {
 
-    when(sessionService.getSession(SESSION_ID))
-        .thenReturn(Optional.of(TEAM_SESSION_WITHOUT_GROUP_ID));
+    when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_GROUP_ID));
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
 
     mvc.perform(
             put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
@@ -764,11 +741,11 @@ class UserControllerIT {
   }
 
   @Test
-  void acceptEnquiry_Should_ReturnSuccess_WhenAcceptEnquiryIsSuccessfull() throws Exception {
+  void acceptEnquiry_Should_ReturnSuccess_WhenAcceptEnquiryIsSuccessful() throws Exception {
 
-    when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(TEAM_SESSION));
+    when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION));
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
 
     mvc.perform(
             put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
@@ -781,12 +758,12 @@ class UserControllerIT {
   @Test
   void acceptEnquiry_Should_ReturnConflict_WhenEnquiryIsAlreadyAssigned() throws Exception {
 
-    when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(TEAM_SESSION));
+    when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION));
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     doThrow(new ConflictException(""))
         .when(assignEnquiryFacade)
-        .assignRegisteredEnquiry(TEAM_SESSION, TEAM_CONSULTANT);
+        .assignRegisteredEnquiry(SESSION, CONSULTANT);
 
     mvc.perform(
             put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
@@ -971,7 +948,6 @@ class UserControllerIT {
   void updateAbsence_Should_ReturnOk_When_Saved() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedTeamConsultant()).thenReturn(TEAM_CONSULTANT);
 
     var validAbsentMessageBody = "{\"absent\": true, \"message\": \"" + MESSAGE + "\"}";
     mvc.perform(
@@ -1064,7 +1040,7 @@ class UserControllerIT {
       getSessionsForAuthenticatedConsultant_Should_ReturnSuccess_WhenAuthorizedAndSessionAvailable()
           throws Exception {
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
 
     mvc.perform(
             get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
@@ -1080,7 +1056,7 @@ class UserControllerIT {
           throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
 
     mvc.perform(
             get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
@@ -1096,7 +1072,7 @@ class UserControllerIT {
           throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
 
     mvc.perform(
             get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
@@ -1161,7 +1137,7 @@ class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
 
     mvc.perform(
             get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER)
@@ -1246,147 +1222,6 @@ class UserControllerIT {
                 .cookie(RC_TOKEN_COOKIE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.OK.value()));
-  }
-
-  /** Method: getTeamSessionsForAuthenticatedConsultant (role: consultant) */
-  @Test
-  void getTeamSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenHeaderParamIsMissing()
-      throws Exception {
-
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void
-      getTeamSessionsForAuthenticatedConsultant_Should_ReturnInternalServerError_WhenNoConsultantInDbFound()
-          throws Exception {
-
-    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedTeamConsultant())
-        .thenThrow(new InternalServerErrorException(""));
-
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isInternalServerError());
-  }
-
-  @Test
-  void
-      getTeamSessionsForAuthenticatedConsultant_Should_ReturnForbidden_WhenConsultantIsNoTeamConsultant()
-          throws Exception {
-
-    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedTeamConsultant())
-        .thenThrow(new ForbiddenException(""));
-
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
-
-    verify(logger, atLeastOnce()).warn(anyString(), anyString());
-  }
-
-  @Test
-  void
-      getTeamSessionsForAuthenticatedConsultant_Should_ReturnNoContent_WhenAuthorizedAndNoSessionsAvailable()
-          throws Exception {
-
-    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
-
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
-  }
-
-  @Test
-  void
-      getTeamSessionsForAuthenticatedConsultant_Should_ReturnSucess_WhenAuthorizedAndSessionsAvailable()
-          throws Exception {
-
-    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
-
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is2xxSuccessful());
-  }
-
-  @Test
-  void getTeamSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamOffestIsMissing()
-      throws Exception {
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_OFFSET)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void
-      getTeamSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamOffestHasANegativeValue()
-          throws Exception {
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void getTeamSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamCountIsMissing()
-      throws Exception {
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_COUNT)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void
-      getTeamSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamCountHasANegativeValue()
-          throws Exception {
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_COUNT)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void getTeamSessionsForAuthenticatedConsultant_Should_ReturnNotContent_WhenFilterParamIsInvalid()
-      throws Exception {
-
-    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
-
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
   }
 
   /** sendNewMessageNotification() */
@@ -1495,15 +1330,16 @@ class UserControllerIT {
   @Test
   void assignSession_Should_ReturnHttpStatusOfAssignSessionFacade() throws Exception {
 
-    when(userAccountService.retrieveValidatedConsultantById(any())).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultantById(any())).thenReturn(CONSULTANT);
     when(sessionService.getSession(Mockito.anyLong())).thenReturn(Optional.of(SESSION));
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY);
-    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT.getId());
-    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
+    when(authenticatedUser.getUserId()).thenReturn(TestConstants.CONSULTANT.getId());
+    when(consultantService.getConsultant(anyString()))
+        .thenReturn(Optional.of(TestConstants.CONSULTANT));
     doThrow(new ConflictException(""))
         .when(assignSessionFacade)
-        .assignSession(SESSION, TEAM_CONSULTANT, CONSULTANT);
+        .assignSession(SESSION, CONSULTANT, TestConstants.CONSULTANT);
 
     mvc.perform(
             put(PATH_PUT_ASSIGN_SESSION)
@@ -1532,7 +1368,7 @@ class UserControllerIT {
   void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenSessionIsNotFoundInDb()
       throws Exception {
 
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(sessionService.getSession(Mockito.anyLong())).thenReturn(Optional.empty());
 
     mvc.perform(
@@ -1549,7 +1385,7 @@ class UserControllerIT {
       assignSession_Should_ReturnForbiddenAndLogError_WhenCallerDoesNotHaveTheRightToAssignEnquiries()
           throws Exception {
 
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(authenticatedUser.getGrantedAuthorities()).thenReturn(AUTHORITY_ASSIGN_SESSION);
@@ -1643,7 +1479,7 @@ class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(createChatFacade.createChatV1(Mockito.any(), Mockito.any()))
         .thenThrow(new InternalServerErrorException(""));
 
@@ -1664,7 +1500,7 @@ class UserControllerIT {
   void createChat_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(createChatFacade.createChatV1(Mockito.any(), Mockito.any()))
         .thenReturn(CREATE_CHAT_RESPONSE_DTO);
 
@@ -1694,7 +1530,7 @@ class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(createChatFacade.createChatV2(Mockito.any(), Mockito.any()))
         .thenThrow(new InternalServerErrorException(""));
 
@@ -1710,7 +1546,7 @@ class UserControllerIT {
   void createChatV2_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(createChatFacade.createChatV2(Mockito.any(), Mockito.any()))
         .thenReturn(CREATE_CHAT_RESPONSE_DTO);
 
@@ -1742,7 +1578,7 @@ class UserControllerIT {
   void startChat_Should_ReturnOK_When_ChatWasStarted() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(chatService.getChat(Mockito.any())).thenReturn(Optional.of(INACTIVE_CHAT));
 
     mvc.perform(
@@ -1880,7 +1716,7 @@ class UserControllerIT {
   @Test
   void stopChat_Should_ReturnBadRequest_When_ChatNotFound() throws Exception {
 
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(chatService.getChat(Mockito.anyLong())).thenReturn(Optional.empty());
 
     mvc.perform(put(PATH_PUT_CHAT_STOP).accept(MediaType.APPLICATION_JSON))
@@ -1890,7 +1726,7 @@ class UserControllerIT {
   @Test
   void stopChat_Should_ReturnOk_When_ChatWasStopped() throws Exception {
 
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
+    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(chatService.getChat(Mockito.anyLong())).thenReturn(Optional.of(chat));
 
     mvc.perform(put(PATH_PUT_CHAT_STOP).accept(MediaType.APPLICATION_JSON))

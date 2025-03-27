@@ -144,7 +144,6 @@ class ArchivedSessionConversationListProviderTestIT {
           session.setConsultant(consultant);
           session.setUser(user);
           session.setId(null);
-          session.setTeamSession(false);
           session.setSessionData(null);
           session.setPostcode("12345");
           session.setConsultingTypeId(CONSULTING_TYPE_ID_OFFENDER);
@@ -157,7 +156,6 @@ class ArchivedSessionConversationListProviderTestIT {
     sessions.get(3).setStatus(SessionStatus.NEW);
     sessions.get(4).setStatus(SessionStatus.IN_ARCHIVE);
     sessions.get(4).setConsultant(consultant2);
-    sessions.get(4).setTeamSession(true);
     this.sessionRepository.saveAll(sessions);
   }
 
@@ -168,7 +166,6 @@ class ArchivedSessionConversationListProviderTestIT {
     consultant.setFirstName("firstname");
     consultant.setLastName("lastname");
     consultant.setEmail(RandomStringUtils.randomAlphabetic(8) + "@lastname.de");
-    consultant.setTeamConsultant(false);
     consultant.setLanguageFormal(false);
     consultant.setAbsent(false);
     consultant.setEncourage2fa(true);

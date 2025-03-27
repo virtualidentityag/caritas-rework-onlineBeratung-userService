@@ -651,42 +651,6 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Returns a list of team consulting sessions for the currently authenticated consultant.
-   *
-   * @param rcToken Rocket.Chat token (required)
-   * @param offset Number of items where to start in the query (0 = first item) (required)
-   * @param count Number of items which are being returned (required)
-   * @param filter Information on how to filter the list (required)
-   * @return {@link ResponseEntity} containing {@link ConsultantSessionListResponseDTO}
-   */
-  @Override
-  public ResponseEntity<ConsultantSessionListResponseDTO> getTeamSessionsForAuthenticatedConsultant(
-      @RequestHeader String rcToken, Integer offset, Integer count, @RequestParam String filter) {
-
-    var consultant = this.userAccountProvider.retrieveValidatedTeamConsultant();
-
-    ConsultantSessionListResponseDTO teamSessionListDTO = null;
-    var optionalSessionFilter = SessionFilter.getByValue(filter);
-    if (optionalSessionFilter.isPresent()) {
-
-      var sessionListQueryParameter =
-          SessionListQueryParameter.builder()
-              .count(count)
-              .offset(offset)
-              .sessionFilter(optionalSessionFilter.get())
-              .build();
-
-      teamSessionListDTO =
-          sessionListFacade.retrieveTeamSessionsDtoForAuthenticatedConsultant(
-              consultant, rcToken, sessionListQueryParameter);
-    }
-
-    return nonNull(teamSessionListDTO) && isNotEmpty(teamSessionListDTO.getSessions())
-        ? new ResponseEntity<>(teamSessionListDTO, HttpStatus.OK)
-        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
-
-  /**
    * Imports a file list of consultants. Technical user authorization required.
    *
    * @return {@link ResponseEntity} containing {@link HttpStatus}

@@ -65,7 +65,6 @@ public class ConsultantAdminFilterServiceBase {
     assertThat(consultantDTO.getLastname(), notNullValue());
     assertThat(consultantDTO.getEmail(), notNullValue());
     assertThat(consultantDTO.getFormalLanguage(), notNullValue());
-    assertThat(consultantDTO.getTeamConsultant(), notNullValue());
     assertThat(consultantDTO.getAbsent(), notNullValue());
     assertThat(consultantDTO.getCreateDate(), notNullValue());
     assertThat(consultantDTO.getUpdateDate(), notNullValue());

@@ -553,20 +553,6 @@ class UserAdminControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  void changeAgencyType_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
-      throws Exception {
-    mvc.perform(
-            post(AGENCY_CHANGE_TYPE_PATH)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(this.consultantAdminFacade, times(1)).changeAgencyType(any(), any());
-  }
-
-  @Test
   void
       deleteConsultantAgency_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
           throws Exception {

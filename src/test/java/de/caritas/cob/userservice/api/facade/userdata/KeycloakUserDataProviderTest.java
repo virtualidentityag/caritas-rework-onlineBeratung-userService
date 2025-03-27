@@ -46,7 +46,6 @@ class KeycloakUserDataProviderTest {
   private void assertOtherDtoAttributesSetToDefaults(UserDataResponseDTO userDataResponseDTO) {
     assertThat(userDataResponseDTO.getEncourage2fa()).isFalse();
     assertThat(userDataResponseDTO.getAbsenceMessage()).isEmpty();
-    assertThat(userDataResponseDTO.isInTeamAgency()).isFalse();
     assertThat(userDataResponseDTO.isHasArchive()).isFalse();
     assertThat(userDataResponseDTO.getAgencies()).isEmpty();
   }

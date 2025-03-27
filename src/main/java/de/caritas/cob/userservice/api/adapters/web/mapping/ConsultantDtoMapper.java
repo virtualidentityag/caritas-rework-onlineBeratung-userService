@@ -111,7 +111,6 @@ public class ConsultantDtoMapper implements DtoMapperUtils {
     consultant.setAbsenceMessage((String) consultantMap.get("absenceMessage"));
     consultant.setAbsent((Boolean) consultantMap.get("isAbsent"));
     consultant.setFormalLanguage((Boolean) consultantMap.get("isLanguageFormal"));
-    consultant.setTeamConsultant((Boolean) consultantMap.get("isTeamConsultant"));
     consultant.setCreateDate((String) consultantMap.get("createdAt"));
     consultant.setUpdateDate((String) consultantMap.get("updatedAt"));
     consultant.setDeleteDate((String) consultantMap.get("deletedAt"));
@@ -134,7 +133,6 @@ public class ConsultantDtoMapper implements DtoMapperUtils {
           agency.setPostcode((String) agencyMap.get("postcode"));
           agency.setCity((String) agencyMap.get("city"));
           agency.setDescription((String) agencyMap.get("description"));
-          agency.setTeamAgency((Boolean) agencyMap.get("isTeamAgency"));
           agency.setOffline((Boolean) agencyMap.get("isOffline"));
           agency.setConsultingType((Integer) agencyMap.get("consultingType"));
           agencies.add(agency);

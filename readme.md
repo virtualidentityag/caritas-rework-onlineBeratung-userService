@@ -9,14 +9,11 @@ It most importantly covers the lifecycle of a consultation/session:
   - assignment of consultants to sessions and the corresponding Rocket.Chat group(s)
 
 Furthermore it handles the different kinds of consultations:
-  - single/direct 1:1 counseling
-  - team counseling
   - group chat counseling
 
 In addition to that it provides different lists of sessions for consultants and askers:
   - asker sessions
-  - sessions directly assigned to consultant
-  - team sessions
+  - sessions assigned to consultant
   - group chats
 
 Moreover it also offers different workflows for deactivating expired group chats and deleting user accounts.

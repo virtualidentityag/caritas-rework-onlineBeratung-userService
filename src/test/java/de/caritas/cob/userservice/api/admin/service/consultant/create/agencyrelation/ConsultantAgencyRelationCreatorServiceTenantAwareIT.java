@@ -105,7 +105,6 @@ class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
 
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
-    agencyDTO.setTeamAgency(false);
     agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
@@ -172,7 +171,6 @@ class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
     session.setConsultant(null);
     session.setUser(user);
     session.setAgencyId(agencyId);
-    session.setTeamSession(true);
     session.setSessionTopics(Lists.newArrayList());
     session.setLanguageCode(LanguageCode.de);
     session.setIsConsultantDirectlySet(false);

@@ -844,57 +844,6 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/sessions/teams:
-    get:
-      tags:
-        - user-controller
-      summary: 'Returns a list of team consulting sessions, which were accepted by
-        other consultants of the team, for the currently authenticated consultant
-        [Authorization: Role: consultant]'
-      operationId: getTeamSessionsForAuthenticatedConsultant
-      parameters:
-        - name: RCToken
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: offset
-          in: query
-          description: Number of items where to start in the query (0 = first item)
-          required: true
-          schema:
-            minimum: 0
-            type: integer
-        - name: count
-          in: query
-          description: Number of items which are being returned
-          required: true
-          schema:
-            minimum: 1
-            type: integer
-        - name: filter
-          in: query
-          description: Information on how to filter the list
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: successful operation
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/ConsultantSessionListResponseDTO'
-        204:
-          description: successful operation, but no content
-        401:
-          description: UNAUTHORIZED - no/invalid Keycloak token
-        403:
-          description: FORBIDDEN - no/invalid role/authorization or CSRF token
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
   /users/mails/messages/new:
     post:
       tags:
@@ -2092,9 +2041,7 @@ components:
         messagesRead:
           type: boolean
           example: false
-        isTeamSession:
-          type: boolean
-          example: false
+
         registrationType:
           type: string
           example: REGISTERED
@@ -2242,9 +2189,6 @@ components:
           type: string
           example: asker123
           description: asker username
-        isTeamSession:
-          type: boolean
-          example: false
         age:
           type: integer
           example: 17
@@ -2504,9 +2448,6 @@ components:
         absenceMessage:
           type: string
           example: Bin mal weg...
-        isInTeamAgency:
-          type: boolean
-          example: true
         agencies:
           type: array
           items:
@@ -2681,9 +2622,6 @@ components:
         description:
           type: string
           example: Our agency provides help for the following topics..
-        teamAgency:
-          type: boolean
-          example: false
         offline:
           type: boolean
           example: false
@@ -2694,10 +2632,16 @@ components:
           type: integer
           format: int64
           example: 12
+        agencySpecificPrivacy:
+          type: string
+          example: "specific for agency privacy text"
         topicIds:
           type: array
           items:
             type: long
+        agencyLogo:
+          type: string
+          example: "base64 encoded image"
 
 
     MobileTokenDTO:

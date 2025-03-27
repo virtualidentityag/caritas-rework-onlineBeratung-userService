@@ -149,7 +149,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/sessions/new/{sessionId:[0-9]+}",
             "/users/consultants/absences",
             "/users/sessions/consultants",
-            "/users/sessions/teams",
             "/conversations/consultants/**")
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/consultant/{consultantId:[0-9A-Za-z-]+}")

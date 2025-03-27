@@ -14,7 +14,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_O
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_SESSION_FOR_CONSULTANT;
-import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_USER_DATA;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_CHAT_NEW;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_IMPORT_ASKERS;
@@ -719,69 +718,6 @@ class UserControllerAuthorizationIT {
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantDataFacade, logService);
-  }
-
-  /** GET on /users/sessions/consultants (role: consultants) */
-  @Test
-  void
-      getTeamSessionsForAuthenticatedConsultant_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
-          throws Exception {
-
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isUnauthorized());
-
-    verifyNoMoreInteractions(authenticatedUser, sessionService);
-  }
-
-  @Test
-  @WithMockUser(
-      authorities = {
-        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-        AuthorityValue.TECHNICAL_DEFAULT,
-        AuthorityValue.USER_DEFAULT,
-        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
-        AuthorityValue.START_CHAT,
-        AuthorityValue.CREATE_NEW_CHAT,
-        AuthorityValue.STOP_CHAT,
-        AuthorityValue.UPDATE_CHAT,
-        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-        AuthorityValue.USER_ADMIN
-      })
-  void
-      getTeamSessionsForAuthenticatedConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
-          throws Exception {
-
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(authenticatedUser, sessionService);
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void
-      getTeamSessionsForAuthenticatedConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
-          throws Exception {
-
-    mvc.perform(
-            get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(authenticatedUser, sessionService);
   }
 
   /** POST on /users/mails/messages/new (role: consultant/user) */

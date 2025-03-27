@@ -277,43 +277,6 @@ public class SessionListFacade {
     }
   }
 
-  /**
-   * Returns a list of {@link ConsultantSessionResponseDTO} with team sessions for the specified
-   * consultant id.
-   *
-   * @param consultant the {@link Consultant}
-   * @param rcAuthToken the Rocket.Chat auth token
-   * @param sessionListQueryParameter session list query parameters as {@link
-   *     SessionListQueryParameter}
-   * @return a {@link ConsultantSessionListResponseDTO} with a {@link List} of {@link
-   *     ConsultantSessionResponseDTO}
-   */
-  public ConsultantSessionListResponseDTO retrieveTeamSessionsDtoForAuthenticatedConsultant(
-      Consultant consultant,
-      String rcAuthToken,
-      SessionListQueryParameter sessionListQueryParameter) {
-
-    List<ConsultantSessionResponseDTO> teamSessions =
-        consultantSessionListService.retrieveTeamSessionsForAuthenticatedConsultant(
-            consultant, rcAuthToken, sessionListQueryParameter);
-
-    List<ConsultantSessionResponseDTO> teamSessionsSublist = new ArrayList<>();
-    if (areMoreConsultantSessionsAvailable(sessionListQueryParameter.getOffset(), teamSessions)) {
-      teamSessionsSublist =
-          retrieveConsultantSessionsSublist(sessionListQueryParameter, teamSessions);
-    }
-
-    if (topicsFeatureEnabled) {
-      enrichWithTopicData(teamSessionsSublist);
-    }
-
-    return new ConsultantSessionListResponseDTO()
-        .sessions(teamSessionsSublist)
-        .offset(sessionListQueryParameter.getOffset())
-        .count(teamSessionsSublist.size())
-        .total(teamSessions.size());
-  }
-
   private void sortSessionsByLastMessageDateDesc(List<ConsultantSessionResponseDTO> sessions) {
     sessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
   }

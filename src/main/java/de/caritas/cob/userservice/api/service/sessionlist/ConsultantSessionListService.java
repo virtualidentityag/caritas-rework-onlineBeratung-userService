@@ -4,7 +4,6 @@ import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -114,30 +113,6 @@ public class ConsultantSessionListService {
     return SessionStatus.valueOf(status)
         .orElseThrow(
             () -> new BadRequestException(String.format("Invalid session status %s ", status)));
-  }
-
-  /**
-   * Returns a list of {@link ConsultantSessionResponseDTO} for the specified consultant id.
-   *
-   * @param consultant the {@link Consultant}
-   * @param rcAuthToken the Rocket.Chat auth token
-   * @param sessionListQueryParameter session list query parameters as {@link
-   *     SessionListQueryParameter}
-   * @return a {@link ConsultantSessionListResponseDTO} with a {@link List} of {@link
-   *     ConsultantSessionResponseDTO}
-   */
-  public List<ConsultantSessionResponseDTO> retrieveTeamSessionsForAuthenticatedConsultant(
-      Consultant consultant,
-      String rcAuthToken,
-      SessionListQueryParameter sessionListQueryParameter) {
-
-    List<ConsultantSessionResponseDTO> teamSessions =
-        sessionService.getTeamSessionsForConsultant(consultant);
-
-    updateConsultantSessionValues(teamSessions, rcAuthToken, consultant);
-    sortSessionsByLastMessageDateDesc(teamSessions);
-
-    return teamSessions;
   }
 
   private List<ConsultantSessionResponseDTO> mergeConsultantSessionsAndChats(

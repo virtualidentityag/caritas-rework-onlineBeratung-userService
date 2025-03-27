@@ -118,7 +118,6 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
         .postcode(session.getPostcode())
         .userId(session.getUser().getUserId())
         .username(session.getUser().getUsername())
-        .isTeamSession(session.isTeamSession())
         .messageDate(String.valueOf(session.getEnquiryMessageDate()))
         .createDate(String.valueOf(session.getCreateDate()))
         .updateDate(String.valueOf(session.getUpdateDate()));

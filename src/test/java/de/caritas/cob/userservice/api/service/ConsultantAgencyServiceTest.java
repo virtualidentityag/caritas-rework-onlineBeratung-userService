@@ -39,12 +39,12 @@ import org.slf4j.Logger;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-public class ConsultantAgencyServiceTest {
+class ConsultantAgencyServiceTest {
 
-  private final String CONSULTANT_ID = "1b71cc46-650d-42bb-8299-f8e3f6d7249a";
-  private final String CONSULTANT_ROCKETCHAT_ID = "xN3Mobksn3xdp7gEk";
-  private final Long AGENCY_ID = 1L;
-  private final Consultant CONSULTANT =
+  private static final String CONSULTANT_ID = "1b71cc46-650d-42bb-8299-f8e3f6d7249a";
+  private static final String CONSULTANT_ROCKETCHAT_ID = "xN3Mobksn3xdp7gEk";
+  private static final Long AGENCY_ID = 1L;
+  private static final Consultant CONSULTANT =
       new Consultant(
           CONSULTANT_ID,
           CONSULTANT_ROCKETCHAT_ID,
@@ -52,7 +52,6 @@ public class ConsultantAgencyServiceTest {
           "first name",
           "last name",
           "consultant@cob.de",
-          false,
           false,
           null,
           false,
@@ -76,17 +75,17 @@ public class ConsultantAgencyServiceTest {
           null,
           false,
           null);
-  private final ConsultantAgency CONSULTANT_AGENCY =
+  private static final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(
           AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
-  private final List<ConsultantAgency> CONSULTANT_AGENCY_LIST = Arrays.asList(CONSULTANT_AGENCY);
-  private final ConsultantAgency NULL_CONSULTANT_AGENCY = null;
-  private final List<ConsultantAgency> CONSULTANT_AGENCY_NULL_LIST =
-      Arrays.asList(NULL_CONSULTANT_AGENCY);
-  private final ConsultantAgency CONSULTANT_NULL_AGENCY =
+  private static final List<ConsultantAgency> CONSULTANT_AGENCY_LIST = List.of(CONSULTANT_AGENCY);
+  private static final ConsultantAgency NULL_CONSULTANT_AGENCY = null;
+  private static final List<ConsultantAgency> CONSULTANT_AGENCY_NULL_LIST =
+      singletonList(NULL_CONSULTANT_AGENCY);
+  private static final ConsultantAgency CONSULTANT_NULL_AGENCY =
       new ConsultantAgency(AGENCY_ID, null, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
-  private final List<ConsultantAgency> CONSULTANT_NULL_AGENCY_LIST =
-      Arrays.asList(CONSULTANT_NULL_AGENCY);
+  private static final List<ConsultantAgency> CONSULTANT_NULL_AGENCY_LIST =
+      singletonList(CONSULTANT_NULL_AGENCY);
 
   @InjectMocks private ConsultantAgencyService consultantAgencyService;
   @Mock private ConsultantAgencyRepository consultantAgencyRepository;
@@ -102,20 +101,19 @@ public class ConsultantAgencyServiceTest {
   private UserDtoMapper userDtoMapper;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
   @Test
-  public void saveConsultantAgency_Should_SaveConsultantAgency() {
+  void saveConsultantAgency_Should_SaveConsultantAgency() {
 
     consultantAgencyService.saveConsultantAgency(CONSULTANT_AGENCY);
     verify(consultantAgencyRepository, times(1)).save(Mockito.any());
   }
 
-  /** Method: findConsultantsByAgencyId */
   @Test
-  public void findConsultantsByAgencyId_Should_ReturnListOfConsultantAgency_WhenAgencyFound() {
+  void findConsultantsByAgencyId_Should_ReturnListOfConsultantAgency_WhenAgencyFound() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.anyLong()))
         .thenReturn(CONSULTANT_AGENCY_LIST);
@@ -125,10 +123,8 @@ public class ConsultantAgencyServiceTest {
         everyItem(instanceOf(ConsultantAgency.class)));
   }
 
-  /** Method: getConsultantsOfAgency */
   @Test
-  public void
-      getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyIsNull() {
+  void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyIsNull() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(
             Mockito.anyLong()))
@@ -143,7 +139,7 @@ public class ConsultantAgencyServiceTest {
   }
 
   @Test
-  public void
+  void
       getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyConsultantIsNull() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(
@@ -159,7 +155,7 @@ public class ConsultantAgencyServiceTest {
   }
 
   @Test
-  public void getConsultantsOfAgency_Should_ReturnListOfConsultantAgency_WhenAgencyFound() {
+  void getConsultantsOfAgency_Should_ReturnListOfConsultantAgency_WhenAgencyFound() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(
             Mockito.anyLong()))
@@ -171,7 +167,7 @@ public class ConsultantAgencyServiceTest {
   }
 
   @Test
-  public void getConsultantsOfAgency_Should_ReturnOnlyConsultantsNotMarkedAsDeleted() {
+  void getConsultantsOfAgency_Should_ReturnOnlyConsultantsNotMarkedAsDeleted() {
     var consultantAgencies =
         new EasyRandom().objects(ConsultantAgency.class, 10).collect(Collectors.toList());
     removeDeletionFlagForConsultantAtIndex(consultantAgencies, 0, 2, 4, 6, 8, 9);
@@ -193,7 +189,7 @@ public class ConsultantAgencyServiceTest {
   }
 
   @Test
-  public void getOnlineAgenciesOfConsultant_Should_returnEmptyList_When_consultantDoesNotExist() {
+  void getOnlineAgenciesOfConsultant_Should_returnEmptyList_When_consultantDoesNotExist() {
     when(consultantAgencyRepository.findByConsultantId(any())).thenReturn(emptyList());
 
     var agencies = consultantAgencyService.getOnlineAgenciesOfConsultant("invalid");
@@ -202,8 +198,7 @@ public class ConsultantAgencyServiceTest {
   }
 
   @Test
-  public void
-      getOnlineAgenciesOfConsultant_Should_returnEmptyList_When_agencyForConsultantDoesNotExist() {
+  void getOnlineAgenciesOfConsultant_Should_returnEmptyList_When_agencyForConsultantDoesNotExist() {
     var consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     when(consultantAgencyRepository.findByConsultantId(any()))
         .thenReturn(singletonList(consultantAgency));
@@ -214,7 +209,7 @@ public class ConsultantAgencyServiceTest {
   }
 
   @Test
-  public void
+  void
       getOnlineAgenciesOfConsultant_Should_returnExpectedAgenciesAndFilterOutOfflineAgencies_When_consultantAgenciesExists() {
     List<ConsultantAgency> consultantAgencies = givenConsultantAgenciesWithDeletionDateNull();
 
@@ -243,18 +238,13 @@ public class ConsultantAgencyServiceTest {
   private static List<ConsultantAgency> givenConsultantAgenciesWithDeletionDateNull() {
     var consultantAgencies =
         new EasyRandom().objects(ConsultantAgency.class, 10).collect(Collectors.toList());
-    consultantAgencies.stream().forEach(ca -> ca.setDeleteDate(null));
+    consultantAgencies.forEach(ca -> ca.setDeleteDate(null));
     return consultantAgencies;
   }
 
   private List<AgencyDTO> mockAgenciesForIds(List<Long> agencyIds) {
     return agencyIds.stream()
-        .map(
-            agencyId -> {
-              var agencyDTO = new EasyRandom().nextObject(AgencyDTO.class);
-              agencyDTO.setId(agencyId);
-              return agencyDTO;
-            })
+        .map(agencyId -> new EasyRandom().nextObject(AgencyDTO.class).offline(false).id(agencyId))
         .collect(Collectors.toList());
   }
 }

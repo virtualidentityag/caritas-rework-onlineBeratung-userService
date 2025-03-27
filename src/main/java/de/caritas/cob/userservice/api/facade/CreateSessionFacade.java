@@ -4,7 +4,6 @@ import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUser
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
@@ -112,10 +111,7 @@ public class CreateSessionFacade {
       User user,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       Consultant consultant) {
-    var agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO);
-    var session =
-        sessionService.initializeDirectSession(
-            consultant, user, userDTO, agencyDTO.getTeamAgency());
+    var session = sessionService.initializeDirectSession(consultant, user, userDTO);
     sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
     session.setConsultant(consultant);
     sessionService.saveSession(session);
@@ -125,11 +121,10 @@ public class CreateSessionFacade {
 
   private Session initializeSession(UserDTO userDTO, User user, AgencyDTO agencyDTO) {
     var sessionData = fromUserDTO(userDTO);
-    var isTeaming = isTrue(agencyDTO.getTeamAgency());
     boolean initialized = false;
 
     try {
-      var session = sessionService.initializeSession(user, userDTO, isTeaming);
+      var session = sessionService.initializeSession(user, userDTO);
       initialized = nonNull(session) && nonNull(session.getId());
       sessionDataService.saveSessionData(session, sessionData);
 

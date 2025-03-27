@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
-import static java.util.Objects.nonNull;
-
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
@@ -25,22 +23,10 @@ class RocketChatOperationConditionProvider {
    * @return true if consultant can be added
    */
   boolean canAddToRocketChatGroup() {
-    return isEnquiry() || isTeamSession();
+    return isEnquiry();
   }
 
   private boolean isEnquiry() {
     return this.session.getStatus().equals(SessionStatus.NEW);
-  }
-
-  private boolean isTeamSession() {
-    return this.session.getStatus().equals(SessionStatus.IN_PROGRESS)
-        && this.session.isTeamSession()
-        && canAddToTeamConsultingSession();
-  }
-
-  private Boolean canAddToTeamConsultingSession() {
-    var consultingTypeSettings =
-        consultingTypeManager.getConsultingTypeSettings(this.session.getConsultingTypeId());
-    return nonNull(consultingTypeSettings);
   }
 }

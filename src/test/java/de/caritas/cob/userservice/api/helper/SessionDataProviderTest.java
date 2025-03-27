@@ -8,7 +8,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.EMAIL;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.STATE_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
@@ -62,7 +61,6 @@ class SessionDataProviderTest {
           "first name",
           "last name",
           "consultant@cob.de",
-          false,
           false,
           null,
           false,
@@ -133,7 +131,6 @@ class SessionDataProviderTest {
           .status(SessionStatus.IN_PROGRESS)
           .enquiryMessageDate(nowInUtc())
           .sessionData(SESSION_DATA)
-          .teamSession(IS_TEAM_SESSION)
           .createDate(nowInUtc())
           .build();
 
@@ -155,7 +152,6 @@ class SessionDataProviderTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(null);
@@ -172,7 +168,6 @@ class SessionDataProviderTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(null);

@@ -29,21 +29,6 @@ public class PathConstants {
       "/users/sessions/consultants?status=1&offset=0&count=-10&filter=all";
   public static final String PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_STATUS =
       "/users/sessions/consultants";
-  public static final String PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT =
-      "/users/sessions/teams?offset=0&count=1&filter=all";
-  public static final String PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_OFFSET =
-      "/users/sessions/teams?count=1&filter=all";
-  public static final String
-      PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET =
-          "/users/sessions/teams?offset=-10&count=1&filter=all";
-  public static final String PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_COUNT =
-      "/users/sessions/teams?offset=0&filter=all";
-  public static final String
-      PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_COUNT =
-          "/users/sessions/teams?offset=0&count=-1&filter=all";
-  public static final String
-      PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER =
-          "/users/sessions/teams?offset=0&count=1&filter=sdfsegsgsdfdsf";
   public static final String PATH_SEND_NEW_MESSAGE_NOTIFICATION = "/users/mails/messages/new";
   public static final String PATH_USER_DATA = "/users/data";
   public static final String PATH_GET_CONSULTANTS_FOR_AGENCY_WITHOUT_PARAM = "/users/consultants";
