@@ -165,7 +165,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/messages/key")
         .hasAuthority(TECHNICAL_DEFAULT)
-        .antMatchers("/users/chat/new", "/users/chat/v2/new")
+        .antMatchers("/users/chat/v2/new")
         .hasAuthority(CREATE_NEW_CHAT)
         .antMatchers("/users/chat/{chatId:[0-9]+}/start")
         .hasAuthority(START_CHAT)

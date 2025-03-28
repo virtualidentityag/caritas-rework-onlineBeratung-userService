@@ -15,7 +15,7 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_S
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_SESSION_FOR_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_USER_DATA;
-import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_CHAT_NEW;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_CHAT_NEW_V2;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_IMPORT_ASKERS;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_IMPORT_ASKERS_WITHOUT_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_IMPORT_CONSULTANTS;
@@ -1232,7 +1232,7 @@ class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(
-            post(PATH_POST_CHAT_NEW)
+            post(PATH_POST_CHAT_NEW_V2)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1263,7 +1263,7 @@ class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(
-            post(PATH_POST_CHAT_NEW)
+            post(PATH_POST_CHAT_NEW_V2)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1279,7 +1279,7 @@ class UserControllerAuthorizationIT {
   void createChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens() throws Exception {
 
     mvc.perform(
-            post(PATH_POST_CHAT_NEW)
+            post(PATH_POST_CHAT_NEW_V2)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
@@ -1293,7 +1293,7 @@ class UserControllerAuthorizationIT {
   void createChat_Should_ReturnBadRequest_WhenProperlyAuthorized() throws Exception {
 
     mvc.perform(
-            post(PATH_POST_CHAT_NEW)
+            post(PATH_POST_CHAT_NEW_V2)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)

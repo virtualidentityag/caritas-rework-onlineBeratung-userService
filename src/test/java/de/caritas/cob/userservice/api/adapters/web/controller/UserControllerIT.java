@@ -670,8 +670,7 @@ class UserControllerIT {
       throws Exception {
 
     when(userAccountService.retrieveValidatedUser()).thenReturn(USER);
-    when(createNewSessionFacade.initializeNewSession(
-            any(), any(), any(RocketChatCredentials.class), Mockito.any()))
+    when(createNewSessionFacade.initializeNewSession(any(), any(), anyList()))
         .thenReturn(new NewRegistrationResponseDto().sessionId(1L).status(HttpStatus.CREATED));
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
@@ -1462,57 +1461,6 @@ class UserControllerIT {
   }
 
   @Test
-  void createChat_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
-
-    mvc.perform(
-            post(PATH_POST_CHAT_NEW)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-
-    verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(userAccountService);
-  }
-
-  @Test
-  void createChat_Should_ReturnInternalServerErrorAndLogError_When_ChatCouldNotBeCreated()
-      throws Exception {
-
-    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
-    when(createChatFacade.createChatV1(Mockito.any(), Mockito.any()))
-        .thenThrow(new InternalServerErrorException(""));
-
-    mvc.perform(
-            post(PATH_POST_CHAT_NEW)
-                .content(giveValidCreateChatBodyWithAgencyId(1L))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-  }
-
-  private String giveValidCreateChatBodyWithAgencyId(Long agencyId) {
-    return VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER.replace(
-        "${AGENCY_ID}", agencyId.toString());
-  }
-
-  @Test
-  void createChat_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
-
-    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(userAccountService.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
-    when(createChatFacade.createChatV1(Mockito.any(), Mockito.any()))
-        .thenReturn(CREATE_CHAT_RESPONSE_DTO);
-
-    mvc.perform(
-            post(PATH_POST_CHAT_NEW)
-                .content(giveValidCreateChatBodyWithAgencyId(1L))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.CREATED.value()));
-  }
-
-  @Test
   void createChatV2_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
 
     mvc.perform(
@@ -1556,6 +1504,11 @@ class UserControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.CREATED.value()));
+  }
+
+  private String giveValidCreateChatBodyWithAgencyId(Long agencyId) {
+    return VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER.replace(
+        "${AGENCY_ID}", agencyId.toString());
   }
 
   /** Method: startChat */
@@ -2123,10 +2076,7 @@ class UserControllerIT {
     newRegistrationDto.setConsultingType("1");
     when(userAccountService.retrieveValidatedUser()).thenReturn(new User());
     when(createNewSessionFacade.initializeNewSession(
-            Mockito.any(UserRegistrationDTO.class),
-            Mockito.any(),
-            Mockito.any(RocketChatCredentials.class),
-            Mockito.any()))
+            Mockito.any(UserRegistrationDTO.class), Mockito.any(), Mockito.anyList()))
         .thenReturn(new NewRegistrationResponseDto().status(HttpStatus.CREATED));
 
     // when

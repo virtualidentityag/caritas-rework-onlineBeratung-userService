@@ -74,55 +74,13 @@ class ChatServiceTest {
   }
 
   @Test
-  void getChatsForUserId_Should_CallFindByUserIdAndFindAssignedByUserIdOnChatRepository() {
-    chatService.getChatsForUserId(USER_ID);
-
-    verify(chatRepository).findByUserId(USER_ID);
-    verify(chatRepository).findAssignedByUserId(USER_ID);
-  }
-
-  @Test
-  void getChatsForUserId_Should_ConcatChatsAndAssignedChats() {
-    when(chatRepository.findByUserId(USER_ID)).thenReturn(singletonList(ACTIVE_CHAT));
+  void getChatsForUserId_Should_CallAssignedByUserIdOnChatRepository() {
     when(chatRepository.findAssignedByUserId(USER_ID)).thenReturn(singletonList(CHAT_V2));
 
     List<UserSessionResponseDTO> resultList = chatService.getChatsForUserId(USER_ID);
 
-    assertEquals(2, resultList.size());
-  }
-
-  @Test
-  void getChatsForUserId_Should_ReturnListOfUserSessionResponseDTOWithChats() {
-    when(chatRepository.findByUserId(USER_ID)).thenReturn(singletonList(ACTIVE_CHAT));
-    when(consultantService.findConsultantsByAgencyIds(Mockito.any()))
-        .thenReturn(singletonList(CONSULTANT));
-
-    List<UserSessionResponseDTO> resultList = chatService.getChatsForUserId(USER_ID);
-
-    assertNull(resultList.get(0).getSession());
-    assertNotNull(resultList.get(0).getChat());
-    assertEquals(ACTIVE_CHAT.getId(), resultList.get(0).getChat().getId());
-    assertEquals(ACTIVE_CHAT.getTopic(), resultList.get(0).getChat().getTopic());
-    assertThat(
-        ACTIVE_CHAT.getConsultingTypeId(), is(resultList.get(0).getChat().getConsultingType()));
-    assertEquals(
-        LocalDate.of(
-            ACTIVE_CHAT.getStartDate().getYear(),
-            ACTIVE_CHAT.getStartDate().getMonth(),
-            ACTIVE_CHAT.getStartDate().getDayOfMonth()),
-        resultList.get(0).getChat().getStartDate());
-    assertEquals(
-        LocalTime.of(
-            ACTIVE_CHAT.getInitialStartDate().getHour(),
-            ACTIVE_CHAT.getInitialStartDate().getMinute()),
-        resultList.get(0).getChat().getStartTime());
-    assertEquals(ACTIVE_CHAT.getDuration(), resultList.get(0).getChat().getDuration());
-    assertEquals(ACTIVE_CHAT.isRepetitive(), resultList.get(0).getChat().isRepetitive());
-    assertEquals(ACTIVE_CHAT.isActive(), resultList.get(0).getChat().isActive());
-    assertEquals(ACTIVE_CHAT.getGroupId(), resultList.get(0).getChat().getGroupId());
-    assertNotNull(resultList.get(0).getChat().getModerators());
-    assertEquals(1, resultList.get(0).getChat().getModerators().length);
-    assertEquals(CONSULTANT.getRocketChatId(), resultList.get(0).getChat().getModerators()[0]);
+    verify(chatRepository).findAssignedByUserId(USER_ID);
+    assertEquals(1, resultList.size());
   }
 
   @Test
