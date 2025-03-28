@@ -709,6 +709,7 @@ public class TestConstants {
    * Session
    */
   public static final Long SESSION_ID = 1L;
+  public static final Long SESSION_ID_WITHOUT_CONSULTANT_NO_RC_USER_ID = 2L;
   public static final Integer SESSION_STATUS_NEW = 1;
   public static final Integer SESSION_STATUS_IN_PROGRESS = 2;
   public static final Long ENQUIRY_ID = 1L;
@@ -757,7 +758,7 @@ public class TestConstants {
 
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
       Session.builder()
-          .id(SESSION_ID)
+          .id(SESSION_ID_WITHOUT_CONSULTANT_NO_RC_USER_ID)
           .user(USER_NO_RC_USER_ID_2)
           .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
           .registrationType(REGISTERED)
