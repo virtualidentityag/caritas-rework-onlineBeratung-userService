@@ -64,7 +64,6 @@ public class SessionMapper {
                 ? session.getUser().getRcUserId()
                 : null)
         .messageDate(toUnixTime(session.getEnquiryMessageDate()))
-        .isTeamSession(session.isTeamSession())
         .language(LanguageCode.fromValue(session.getLanguageCode().name()))
         .registrationType(session.getRegistrationType().name())
         .createDate(toIsoTime(session.getCreateDate()))

@@ -180,6 +180,12 @@ public class UserController implements UsersApi {
 
   private final @NonNull SessionDeleteService sessionDeleteService;
 
+  /**
+   * Checks if a given user exists.
+   *
+   * @param username username (required)
+   * @return 200 OK if the user exists, otherwise a 404 NOT FOUND
+   */
   @Override
   public ResponseEntity<Void> userExists(String username) {
     val usernameAvailable = identityClient.isUsernameAvailable(username);
@@ -191,7 +197,7 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Creates an user account and returns a 201 CREATED on success.
+   * Creates a user account and returns a 201 CREATED on success.
    *
    * @param user the {@link UserDTO}
    * @return {@link ResponseEntity} with possible registration conflict information in header
@@ -219,7 +225,7 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Creates a new session or chat-agency relation depending on the provided consulting type.
+   * Creates a new session for an already existing user based on ConsultingType.
    *
    * @param rcToken Rocket.Chat token (required)
    * @param rcUserId Rocket.Chat user ID (required)
@@ -227,27 +233,23 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link NewRegistrationResponseDto}
    */
   @Override
+  @Deprecated
   public ResponseEntity<NewRegistrationResponseDto> registerNewConsultingType(
       @RequestHeader String rcToken,
       @RequestHeader String rcUserId,
       @Valid @RequestBody NewRegistrationDto newRegistrationDto) {
 
     var user = this.userAccountProvider.retrieveValidatedUser();
-    var rocketChatCredentials =
-        RocketChatCredentials.builder().rocketChatToken(rcToken).rocketChatUserId(rcUserId).build();
 
     var registrationResponse =
         createNewSessionFacade.initializeNewSession(
-            newRegistrationDto,
-            user,
-            rocketChatCredentials,
-            Lists.newArrayList(ONE_SESSION_PER_CONSULTING_TYPE));
+            newRegistrationDto, user, Lists.newArrayList(ONE_SESSION_PER_CONSULTING_TYPE));
 
     return new ResponseEntity<>(registrationResponse, registrationResponse.getStatus());
   }
 
   /**
-   * Creates a new session or chat-agency relation depending on the provided topic.
+   * Creates a new session for an already existing user based on topics.
    *
    * @param rcToken Rocket.Chat token (required)
    * @param rcUserId Rocket.Chat user ID (required)
@@ -260,15 +262,10 @@ public class UserController implements UsersApi {
       @RequestHeader(value = "RCUserId", required = true) String rcUserId,
       de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationDto newRegistrationDto) {
     var user = this.userAccountProvider.retrieveValidatedUser();
-    var rocketChatCredentials =
-        RocketChatCredentials.builder().rocketChatToken(rcToken).rocketChatUserId(rcUserId).build();
 
     var response =
         createNewSessionFacade.initializeNewSession(
-            newRegistrationDto,
-            user,
-            rocketChatCredentials,
-            Lists.newArrayList(ONE_SESSION_PER_TOPIC_ID_AND_AGENCY_ID));
+            newRegistrationDto, user, Lists.newArrayList(ONE_SESSION_PER_TOPIC_ID_AND_AGENCY_ID));
 
     return new ResponseEntity<>(response, response.getStatus());
   }
@@ -651,42 +648,6 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Returns a list of team consulting sessions for the currently authenticated consultant.
-   *
-   * @param rcToken Rocket.Chat token (required)
-   * @param offset Number of items where to start in the query (0 = first item) (required)
-   * @param count Number of items which are being returned (required)
-   * @param filter Information on how to filter the list (required)
-   * @return {@link ResponseEntity} containing {@link ConsultantSessionListResponseDTO}
-   */
-  @Override
-  public ResponseEntity<ConsultantSessionListResponseDTO> getTeamSessionsForAuthenticatedConsultant(
-      @RequestHeader String rcToken, Integer offset, Integer count, @RequestParam String filter) {
-
-    var consultant = this.userAccountProvider.retrieveValidatedTeamConsultant();
-
-    ConsultantSessionListResponseDTO teamSessionListDTO = null;
-    var optionalSessionFilter = SessionFilter.getByValue(filter);
-    if (optionalSessionFilter.isPresent()) {
-
-      var sessionListQueryParameter =
-          SessionListQueryParameter.builder()
-              .count(count)
-              .offset(offset)
-              .sessionFilter(optionalSessionFilter.get())
-              .build();
-
-      teamSessionListDTO =
-          sessionListFacade.retrieveTeamSessionsDtoForAuthenticatedConsultant(
-              consultant, rcToken, sessionListQueryParameter);
-    }
-
-    return nonNull(teamSessionListDTO) && isNotEmpty(teamSessionListDTO.getSessions())
-        ? new ResponseEntity<>(teamSessionListDTO, HttpStatus.OK)
-        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
-
-  /**
    * Imports a file list of consultants. Technical user authorization required.
    *
    * @return {@link ResponseEntity} containing {@link HttpStatus}
@@ -981,27 +942,8 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Creates a new chat with the given details and returns the generated chat link.
-   *
-   * <p>The old version (v1) assumed, that the consultant is assigned to exactly one agency.
-   *
-   * @param chatDTO {@link ChatDTO} (required)
-   * @return {@link ResponseEntity} containing {@link CreateChatResponseDTO}
-   */
-  @Override
-  public ResponseEntity<CreateChatResponseDTO> createChatV1(@RequestBody ChatDTO chatDTO) {
-
-    var callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
-    var response = createChatFacade.createChatV1(chatDTO, callingConsultant);
-
-    return new ResponseEntity<>(response, HttpStatus.CREATED);
-  }
-
-  /**
-   * Creates a new chat with the given details and returns the generated chat link.
-   *
-   * <p>The new version (v2) creates chat_agency relations for all agencies the consultant is
-   * assigned, but ignores the consulting_type stored in the chat.
+   * Creates a new chat with the given details, create a chat_agency relations of the given agency
+   * in ChatDTO and returns the generated chat link.
    *
    * @param chatDTO {@link ChatDTO} (required)
    * @return {@link ResponseEntity} containing {@link CreateChatResponseDTO}

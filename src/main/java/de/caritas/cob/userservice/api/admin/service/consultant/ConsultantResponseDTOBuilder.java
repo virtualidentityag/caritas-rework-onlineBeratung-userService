@@ -62,7 +62,6 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
         .lastname(consultant.getLastName())
         .email(consultant.getEmail())
         .formalLanguage(consultant.isLanguageFormal())
-        .teamConsultant(consultant.isTeamConsultant())
         .absent(consultant.isAbsent())
         .absenceMessage(consultant.getAbsenceMessage())
         .createDate(String.valueOf(consultant.getCreateDate()))

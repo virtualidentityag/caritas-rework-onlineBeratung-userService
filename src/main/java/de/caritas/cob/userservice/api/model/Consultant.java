@@ -119,9 +119,6 @@ public class Consultant implements TenantAware, NotificationsAware {
   @Field
   private boolean absent;
 
-  @Column(name = "is_team_consultant", nullable = false, columnDefinition = "tinyint")
-  private boolean teamConsultant;
-
   @Column(name = "absence_message")
   @Lob
   private String absenceMessage;

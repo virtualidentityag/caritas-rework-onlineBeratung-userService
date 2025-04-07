@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_SESSION;
-import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
@@ -62,23 +61,5 @@ public class ConversationController implements ConversationsApi {
             offset, count, ARCHIVED_SESSION, rcToken);
 
     return ResponseEntity.ok(archivedSessions);
-  }
-
-  /**
-   * Entry point to retrieve all archived team sessions for current authenticated consultant.
-   *
-   * @param offset Number of items where to start in the query (0 = first item) (required)
-   * @param count Number of items which are being returned (required)
-   * @return the {@link ConsultantSessionListResponseDTO}
-   */
-  @Override
-  public ResponseEntity<ConsultantSessionListResponseDTO> getArchivedTeamSessions(
-      Integer offset, Integer count, @RequestHeader String rcToken) {
-
-    ConsultantSessionListResponseDTO archivedTeamSessions =
-        this.conversationListResolver.resolveConversations(
-            offset, count, ARCHIVED_TEAM_SESSION, rcToken);
-
-    return ResponseEntity.ok(archivedTeamSessions);
   }
 }

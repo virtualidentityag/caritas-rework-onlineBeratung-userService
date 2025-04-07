@@ -149,7 +149,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/sessions/new/{sessionId:[0-9]+}",
             "/users/consultants/absences",
             "/users/sessions/consultants",
-            "/users/sessions/teams",
             "/conversations/consultants/**")
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/consultant/{consultantId:[0-9A-Za-z-]+}")
@@ -166,7 +165,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/messages/key")
         .hasAuthority(TECHNICAL_DEFAULT)
-        .antMatchers("/users/chat/new", "/users/chat/v2/new")
+        .antMatchers("/users/chat/v2/new")
         .hasAuthority(CREATE_NEW_CHAT)
         .antMatchers("/users/chat/{chatId:[0-9]+}/start")
         .hasAuthority(START_CHAT)

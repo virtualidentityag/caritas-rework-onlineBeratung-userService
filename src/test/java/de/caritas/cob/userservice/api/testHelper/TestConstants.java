@@ -318,7 +318,6 @@ public class TestConstants {
   public static final String AGENCY_NAME = "Test Beratungsstelle";
   public static final AgencyDTO EMPTY_AGENCY_DTO = new AgencyDTO();
   public static final String DESCRIPTION = "description";
-  public static final boolean IS_TEAM_AGENCY = true;
   public static final boolean IS_NOT_OFFLINE = false;
   public static final AgencyDTO AGENCY_DTO_SUCHT =
       new AgencyDTO()
@@ -327,7 +326,6 @@ public class TestConstants {
           .postcode(POSTCODE)
           .city(CITY)
           .description(DESCRIPTION)
-          .teamAgency(IS_TEAM_AGENCY)
           .offline(IS_NOT_OFFLINE)
           .consultingType(0);
   public static final AgencyDTO AGENCY_DTO_U25 =
@@ -337,7 +335,6 @@ public class TestConstants {
           .postcode(POSTCODE)
           .city(CITY)
           .description(DESCRIPTION)
-          .teamAgency(IS_TEAM_AGENCY)
           .offline(IS_NOT_OFFLINE)
           .consultingType(1);
   public static final AgencyDTO AGENCY_DTO_KREUZBUND =
@@ -347,7 +344,6 @@ public class TestConstants {
           .postcode(POSTCODE)
           .city(CITY)
           .description(DESCRIPTION)
-          .teamAgency(IS_TEAM_AGENCY)
           .offline(IS_NOT_OFFLINE)
           .consultingType(15);
   public static final List<AgencyDTO> AGENCY_DTO_LIST = Collections.singletonList(AGENCY_DTO_SUCHT);
@@ -375,7 +371,6 @@ public class TestConstants {
   public static final String EMAIL = "email@email.com";
   public static final String PASSWORD = "TestPw!#123";
   public static final String PASSWORD_URL_ENCODED = "TestPw!%23123";
-  public static final boolean IS_TEAM_CONSULTANT = true;
   public static final boolean IS_LANGUAGE_FORMAL = true;
   public static final String VALID_AGE = "1";
   public static final String INVALID_AGE = "xxx";
@@ -390,7 +385,6 @@ public class TestConstants {
           LAST_NAME,
           EMAIL,
           IS_ABSENT,
-          IS_TEAM_CONSULTANT,
           ABSENCE_MESSAGE,
           IS_LANGUAGE_FORMAL,
           null,
@@ -421,7 +415,6 @@ public class TestConstants {
           "first name",
           "last name",
           EMAIL,
-          false,
           false,
           null,
           false,
@@ -654,7 +647,6 @@ public class TestConstants {
           "last name",
           EMAIL,
           false,
-          false,
           "absent",
           false,
           null,
@@ -685,7 +677,6 @@ public class TestConstants {
           "first name",
           "last name",
           EMAIL,
-          false,
           false,
           null,
           false,
@@ -718,11 +709,9 @@ public class TestConstants {
    * Session
    */
   public static final Long SESSION_ID = 1L;
-  public static final Long TEAM_SESSION_ID = 55L;
+  public static final Long SESSION_ID_WITHOUT_CONSULTANT_NO_RC_USER_ID = 2L;
   public static final Integer SESSION_STATUS_NEW = 1;
   public static final Integer SESSION_STATUS_IN_PROGRESS = 2;
-  public static final boolean IS_TEAM_SESSION = true;
-  public static final boolean IS_NO_TEAM_SESSION = false;
   public static final Long ENQUIRY_ID = 1L;
   public static final Long ENQUIRY_ID_2 = 2L;
   public static final Session SESSION =
@@ -734,7 +723,6 @@ public class TestConstants {
           .status(IN_PROGRESS)
           .createDate(nowInUtc())
           .updateDate(nowInUtc())
-          .teamSession(false)
           .build();
 
   public static final Session SESSION_WITH_ASKER_AND_CONSULTANT =
@@ -751,24 +739,6 @@ public class TestConstants {
           .status(IN_PROGRESS)
           .createDate(nowInUtc())
           .updateDate(nowInUtc())
-          .teamSession(false)
-          .build();
-
-  public static final Session TEAM_SESSION_WITH_ASKER_AND_CONSULTANT =
-      Session.builder()
-          .id(SESSION_ID)
-          .user(USER_WITH_RC_ID)
-          .consultant(CONSULTANT_2)
-          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
-          .registrationType(REGISTERED)
-          .agencyId(AGENCY_ID)
-          .enquiryMessageDate(nowInUtc())
-          .groupId(RC_GROUP_ID)
-          .postcode(POSTCODE)
-          .status(IN_PROGRESS)
-          .createDate(nowInUtc())
-          .updateDate(nowInUtc())
-          .teamSession(true)
           .build();
 
   public static final Session SESSION_WITHOUT_CONSULTANT =
@@ -784,12 +754,11 @@ public class TestConstants {
           .status(SessionStatus.NEW)
           .createDate(nowInUtc())
           .updateDate(nowInUtc())
-          .teamSession(true)
           .build();
 
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
       Session.builder()
-          .id(TEAM_SESSION_ID)
+          .id(SESSION_ID_WITHOUT_CONSULTANT_NO_RC_USER_ID)
           .user(USER_NO_RC_USER_ID_2)
           .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
           .registrationType(REGISTERED)
@@ -800,7 +769,6 @@ public class TestConstants {
           .status(NEW)
           .createDate(nowInUtc())
           .updateDate(nowInUtc())
-          .teamSession(false)
           .build();
 
   public static final Session U25_SESSION_WITHOUT_CONSULTANT =
@@ -816,7 +784,6 @@ public class TestConstants {
           .status(NEW)
           .createDate(nowInUtc())
           .updateDate(nowInUtc())
-          .teamSession(true)
           .build();
   public static final List<Session> SESSION_LIST = Collections.singletonList(SESSION);
   public static final Set<Session> SESSION_SET =
@@ -853,8 +820,7 @@ public class TestConstants {
           .postcode(POSTCODE)
           .groupId(RC_GROUP_ID)
           .askerRcId(RC_USER_ID)
-          .messageDate(MESSAGE_DATE)
-          .isTeamSession(IS_TEAM_SESSION);
+          .messageDate(MESSAGE_DATE);
   public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_U25 =
       new UserSessionResponseDTO()
           .session(SESSION_DTO_U25)
@@ -870,8 +836,7 @@ public class TestConstants {
           .status(0)
           .groupId(RC_GROUP_ID)
           .askerRcId(RC_USER_ID)
-          .messageDate(Helper.getUnixTimestampFromDate(NOW))
-          .isTeamSession(IS_NO_TEAM_SESSION);
+          .messageDate(Helper.getUnixTimestampFromDate(NOW));
   public static final SessionDTO SESSION_DTO_2 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -880,8 +845,7 @@ public class TestConstants {
           .status(0)
           .groupId(RC_GROUP_ID_2)
           .askerRcId(RC_USER_ID_2)
-          .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86400000)))
-          .isTeamSession(IS_NO_TEAM_SESSION);
+          .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86400000)));
   public static final SessionDTO SESSION_DTO_3 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -890,8 +854,7 @@ public class TestConstants {
           .status(0)
           .groupId(RC_GROUP_ID_3)
           .askerRcId(RC_USER_ID_3)
-          .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
-          .isTeamSession(IS_NO_TEAM_SESSION);
+          .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)));
 
   /** Chat */
   public static final String CHAT_TOPIC = "Pregnancy";
@@ -1467,7 +1430,6 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(null)
-          .notifications(null)
           .languageFormal(true)
           .roles(null)
           .registration(null);
@@ -1491,7 +1453,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(REGISTRATION_WITH_MANDATORY_AGE);
@@ -1506,7 +1467,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(REGISTRATION_WITHOUT_MANDATORY_AGE);
@@ -1529,7 +1489,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(REGISTRATION_WITH_MANDATORY_STATE);
@@ -1544,7 +1503,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(REGISTRATION_WITHOUT_MANDATORY_STATE);
@@ -1571,7 +1529,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
@@ -1586,7 +1543,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
@@ -1600,7 +1556,6 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-          .notifications(null)
           .languageFormal(false)
           .roles(null)
           .registration(REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
@@ -1614,7 +1569,6 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-          .notifications(null)
           .languageFormal(false)
           .roles(null)
           .registration(REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
@@ -1629,7 +1583,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(null);
@@ -1644,7 +1597,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(null);
@@ -1659,7 +1611,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(null);
@@ -1674,7 +1625,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(true)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(null);
@@ -1689,7 +1639,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(REGISTRATION_WITH_MANDATORY_FIELDS_NULL);

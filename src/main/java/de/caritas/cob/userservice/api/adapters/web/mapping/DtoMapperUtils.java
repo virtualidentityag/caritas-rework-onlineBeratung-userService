@@ -35,7 +35,6 @@ public interface DtoMapperUtils {
         .postcode(agencyDTO.getPostcode())
         .name(agencyDTO.getName())
         .description(agencyDTO.getDescription())
-        .teamAgency(agencyDTO.getTeamAgency())
         .offline(agencyDTO.getOffline())
         .topicIds(agencyDTO.getTopicIds());
   }

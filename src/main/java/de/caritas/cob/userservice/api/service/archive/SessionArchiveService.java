@@ -87,7 +87,7 @@ public class SessionArchiveService {
   }
 
   public void checkPermission(Session session) {
-    if (!hasConsultantPermission(session) && !session.isAdvised(authenticatedUser.getUserId())) {
+    if (!hasConsultantPermission(session) && !hasUserPermission(session)) {
       var template = "Archive/reactivate session %s is not allowed for user with id %s";
       var message = String.format(template, session.getId(), authenticatedUser.getUserId());
 
@@ -95,10 +95,14 @@ public class SessionArchiveService {
     }
   }
 
+  private boolean hasUserPermission(Session session) {
+    var userId = authenticatedUser.getUserId();
+    return session.isAdvised(userId);
+  }
+
   private boolean hasConsultantPermission(Session session) {
     var userId = authenticatedUser.getUserId();
-
-    return session.isAdvisedBy(userId) || accountManager.isTeamAdvisedBy(session.getId(), userId);
+    return session.isAdvisedBy(userId);
   }
 
   private Session retrieveSession(Long sessionId) {

@@ -70,7 +70,6 @@ public class ConsultantAdminServiceIT {
     assertThat(consultantById.getEmbedded().getLastname(), notNullValue());
     assertThat(consultantById.getEmbedded().getUsername(), notNullValue());
     assertThat(consultantById.getEmbedded().getAbsent(), notNullValue());
-    assertThat(consultantById.getEmbedded().getTeamConsultant(), notNullValue());
     assertThat(consultantById.getEmbedded().getFormalLanguage(), notNullValue());
     assertThat(consultantById.getEmbedded().getId(), is(EXISTING_CONSULTANT));
     assertThat(consultantById.getEmbedded().getUpdateDate(), notNullValue());

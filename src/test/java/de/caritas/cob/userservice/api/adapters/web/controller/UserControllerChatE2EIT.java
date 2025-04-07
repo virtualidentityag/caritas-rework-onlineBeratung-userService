@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER;
-import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_CREATE_CHAT_V1_BODY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
@@ -146,6 +145,8 @@ class UserControllerChatE2EIT {
 
   @Autowired private UserAgencyRepository userAgencyRepository;
 
+  @Autowired private UserChatRepository userChatRepository;
+
   @Autowired private VideoChatConfig videoChatConfig;
 
   @Autowired private IdentityConfig identityConfig;
@@ -222,26 +223,6 @@ class UserControllerChatE2EIT {
         .thenReturn(
             new TestAgencyControllerApi(
                 new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.CREATE_NEW_CHAT)
-  @Transactional
-  void createChatV1_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
-    givenAValidConsultant(true);
-    givenAValidRocketChatSystemUser();
-
-    mockMvc
-        .perform(
-            post("/users/chat/new")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(VALID_CREATE_CHAT_V1_BODY)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("groupId", is("rcGroupId")));
   }
 
   @Test
@@ -526,7 +507,7 @@ class UserControllerChatE2EIT {
   void assignChat_Should_ReturnOK() throws Exception {
     givenAValidUser(true);
     givenAValidConsultant();
-    givenAValidChat(false);
+    givenAValidChat(false, false);
 
     mockMvc
         .perform(
@@ -548,7 +529,7 @@ class UserControllerChatE2EIT {
   void assignChat_Should_ReturnConflict_When_UserIsAlreadyAssigned() throws Exception {
     givenAValidUser(true);
     givenAValidConsultant();
-    givenAValidChat(false);
+    givenAValidChat(false, false);
 
     mockMvc
         .perform(
@@ -1435,6 +1416,10 @@ class UserControllerChatE2EIT {
   }
 
   private void givenAValidChat(boolean isRepetitive) {
+    givenAValidChat(isRepetitive, true);
+  }
+
+  private void givenAValidChat(boolean isRepetitive, boolean isAssigned) {
     chat = easyRandom.nextObject(Chat.class);
     chat.setId(null);
     chat.setGroupId(RC_GROUP_ID);
@@ -1453,12 +1438,9 @@ class UserControllerChatE2EIT {
     chatAgency.setAgencyId(agencyId);
     chatAgencyRepository.save(chatAgency);
 
-    if (nonNull(user)) {
-      userAgency = new UserAgency();
-      userAgency.setUser(user);
-      userAgency.setAgencyId(agencyId);
-      user.getUserAgencies().add(userAgency);
-      userAgencyRepository.save(userAgency);
+    if (nonNull(user) && isAssigned) {
+      UserChat userChat = UserChat.builder().user(user).chat(chat).build();
+      userChatRepository.save(userChat);
     }
   }
 

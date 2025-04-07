@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
-import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -92,24 +91,6 @@ public class UserAccountService {
             () ->
                 new InternalServerErrorException(
                     String.format("Consultant with id %s not found", consultantId)));
-  }
-
-  /**
-   * Tries to retrieve the team consultant of the current {@link AuthenticatedUser} and throws an
-   * 403 - Forbidden Error if {@link Consultant} is not a team consultant.
-   *
-   * @return the validated {@link Consultant}
-   */
-  public Consultant retrieveValidatedTeamConsultant() {
-    Consultant consultant = retrieveValidatedConsultant();
-    if (consultant.isTeamConsultant()) {
-      return consultant;
-    }
-    throw new ForbiddenException(
-        String.format(
-            "Consultant with id %s is no team consultant and therefore not allowed to get team "
-                + "sessions.",
-            authenticatedUser.getUserId()));
   }
 
   /**

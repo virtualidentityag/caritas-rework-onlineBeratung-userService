@@ -70,7 +70,6 @@ public class ConsultantDataProvider {
         .preferredLanguage(preferredLanguageOf(consultant.getLanguageCode()))
         .encourage2fa(consultant.getEncourage2fa())
         .absenceMessage(consultant.getAbsenceMessage())
-        .isInTeamAgency(consultant.isTeamConsultant())
         .agencies(agencyDTOsOf(consultant))
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
@@ -113,8 +112,7 @@ public class ConsultantDataProvider {
   }
 
   private boolean hasArchive(Consultant consultant) {
-    return hasAtLeastOneRegisteredSessionInProgressOrArchive(consultant)
-        || consultant.isTeamConsultant();
+    return hasAtLeastOneRegisteredSessionInProgressOrArchive(consultant);
   }
 
   private boolean hasAtLeastOneRegisteredSessionInProgressOrArchive(Consultant consultant) {

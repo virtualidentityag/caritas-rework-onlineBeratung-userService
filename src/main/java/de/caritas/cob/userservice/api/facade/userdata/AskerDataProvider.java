@@ -60,7 +60,6 @@ public class AskerDataProvider {
             .encourage2fa(user.getEncourage2fa())
             .isFormalLanguage(user.isLanguageFormal())
             .preferredLanguage(LanguageCode.fromValue(user.getLanguageCode().toString()))
-            .isInTeamAgency(false)
             .userRoles(authenticatedUser.getRoles())
             .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
             .consultingTypes(getConsultingTypes(user))

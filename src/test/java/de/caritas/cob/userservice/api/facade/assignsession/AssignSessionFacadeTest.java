@@ -13,7 +13,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,9 +67,8 @@ class AssignSessionFacadeTest {
   @Mock HttpServletRequest httpServletRequest;
 
   @Test
-  void assignSession_Should_removeAllUnauthorizedMembers_When_sessionIsNotATeamSession() {
+  void assignSession_Should_removeAllUnauthorizedMembers() {
     Session session = easyRandom.nextObject(Session.class);
-    session.setTeamSession(false);
     session.setStatus(SessionStatus.NEW);
     session.setConsultant(null);
     session.getUser().setRcUserId("userRcId");
@@ -117,67 +115,8 @@ class AssignSessionFacadeTest {
   }
 
   @Test
-  void assignSession_ShouldNot_removeTeamMembers_When_sessionIsTeamSession() {
-    Session session = easyRandom.nextObject(Session.class);
-    session.setTeamSession(false);
-    session.setStatus(SessionStatus.NEW);
-    session.setConsultant(null);
-    session.getUser().setRcUserId("userRcId");
-    session.setRegistrationType(RegistrationType.REGISTERED);
-    session.setAgencyId(1L);
-    ConsultantAgency consultantAgency = easyRandom.nextObject(ConsultantAgency.class);
-    consultantAgency.setAgencyId(1L);
-    Consultant consultant = easyRandom.nextObject(Consultant.class);
-    consultant.setConsultantAgencies(asSet(consultantAgency));
-    consultant.setRocketChatId("newConsultantRcId");
-    when(this.rocketChatFacade.retrieveRocketChatMembers(anyString()))
-        .thenReturn(
-            asList(
-                new GroupMemberDTO("userRcId", null, "name", null, null),
-                new GroupMemberDTO("newConsultantRcId", null, "name", null, null),
-                new GroupMemberDTO("otherRcId", null, "name", null, null),
-                new GroupMemberDTO("teamConsultantRcId", null, "name", null, null),
-                new GroupMemberDTO("teamConsultantRcId2", null, "name", null, null)));
-    Consultant consultantToRemove = easyRandom.nextObject(Consultant.class);
-    consultantToRemove.setRocketChatId("otherRcId");
-    when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
-    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any(), any()))
-        .thenReturn(List.of(consultantToRemove));
-    var consultantToKeep = easyRandom.nextObject(Consultant.class);
-
-    assignSessionFacade.assignSession(session, consultant, consultantToKeep);
-
-    verify(sessionToConsultantVerifier, times(1))
-        .verifyPreconditionsForAssignment(
-            argThat(
-                consultantSessionDTO ->
-                    consultantSessionDTO.getConsultant().equals(consultant)
-                        && consultantSessionDTO.getSession().equals(session)));
-    verifyAsync(
-        a ->
-            verify(this.rocketChatFacade, atLeastOnce())
-                .removeUserFromGroupIgnoreGroupNotFound(
-                    consultantToRemove.getRocketChatId(), session.getGroupId()));
-    verifyAsync(
-        a ->
-            verify(this.rocketChatFacade, never())
-                .removeUserFromGroupIgnoreGroupNotFound(
-                    "teamConsultantRcId", session.getGroupId()));
-    verifyAsync(
-        a ->
-            verify(this.rocketChatFacade, never())
-                .removeUserFromGroupIgnoreGroupNotFound(
-                    "teamConsultantRcId2", session.getGroupId()));
-    verifyAsync(
-        a ->
-            verify(this.emailNotificationFacade, times(1))
-                .sendAssignEnquiryEmailNotification(any(), any(), any(), any()));
-  }
-
-  @Test
   void assignSession_Should_FireAssignSessionStatisticsEvent() {
     Session session = new EasyRandom().nextObject(Session.class);
-    session.setTeamSession(false);
     session.setStatus(SessionStatus.NEW);
     session.setConsultant(null);
     session.getUser().setRcUserId("userRcId");
@@ -218,7 +157,6 @@ class AssignSessionFacadeTest {
   @Test
   void assignSession_Should_FireAssignSessionStatisticsEventWithoutOptionalArgs() {
     var session = easyRandom.nextObject(Session.class);
-    session.setTeamSession(false);
     session.setStatus(SessionStatus.NEW);
     session.setConsultant(null);
     session.getUser().setRcUserId("userRcId");

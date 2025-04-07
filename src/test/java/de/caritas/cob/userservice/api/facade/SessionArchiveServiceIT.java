@@ -34,7 +34,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @Import({ConsultingTypeManagerTestConfig.class})
-public class SessionArchiveServiceIT {
+class SessionArchiveServiceIT {
 
   @Autowired SessionArchiveService sessionArchiveService;
   @Autowired SessionRepository sessionRepository;
@@ -42,10 +42,9 @@ public class SessionArchiveServiceIT {
   @MockBean RocketChatService rocketChatService;
 
   @Test
-  public void archiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
+  void archiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
 
-    when(authenticatedUser.getUserId()).thenReturn("e2f20d3a-1ca7-4cb5-9fac-8e26033416b3");
-    when(authenticatedUser.isConsultant()).thenReturn(true);
+    when(authenticatedUser.getUserId()).thenReturn("75abe824-fb42-476d-a52a-66660113bdcc");
 
     sessionArchiveService.archiveSession(2L);
 
@@ -55,7 +54,7 @@ public class SessionArchiveServiceIT {
   }
 
   @Test
-  public void archiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
+  void archiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
     assertThrows(
         NotFoundException.class,
         () -> {
@@ -64,7 +63,7 @@ public class SessionArchiveServiceIT {
   }
 
   @Test
-  public void archiveSession_Should_ThrowForbiddenException_WhenConsultantHasNoPermission() {
+  void archiveSession_Should_ThrowForbiddenException_WhenConsultantHasNoPermission() {
     assertThrows(
         ForbiddenException.class,
         () -> {
@@ -77,7 +76,7 @@ public class SessionArchiveServiceIT {
   }
 
   @Test
-  public void archiveSession_Should_ThrowForbiddenException_WhenUserHasNoPermission() {
+  void archiveSession_Should_ThrowForbiddenException_WhenUserHasNoPermission() {
     assertThrows(
         ForbiddenException.class,
         () -> {
@@ -90,7 +89,7 @@ public class SessionArchiveServiceIT {
   }
 
   @Test
-  public void archiveSession_Should_ThrowConflictException_WhenSessionIsNotInProgress() {
+  void archiveSession_Should_ThrowConflictException_WhenSessionIsNotInProgress() {
     assertThrows(
         ConflictException.class,
         () -> {
@@ -101,7 +100,7 @@ public class SessionArchiveServiceIT {
   }
 
   @Test
-  public void reactivateSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
+  void reactivateSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
 
     when(authenticatedUser.getUserId()).thenReturn("75abe824-fb42-476d-a52a-66660113bdcc");
     when(authenticatedUser.isConsultant()).thenReturn(true);
@@ -114,7 +113,7 @@ public class SessionArchiveServiceIT {
   }
 
   @Test
-  public void reactivateSession_Should_ChangeStatusOfSession_WhenUserHasPermission() {
+  void reactivateSession_Should_ChangeStatusOfSession_WhenUserHasPermission() {
 
     when(authenticatedUser.getUserId()).thenReturn("236b97bf-6cd7-434a-83f3-0a0b129dd45a");
     when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
@@ -127,7 +126,7 @@ public class SessionArchiveServiceIT {
   }
 
   @Test
-  public void reactivateSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
+  void reactivateSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
     assertThrows(
         NotFoundException.class,
         () -> {
@@ -136,7 +135,7 @@ public class SessionArchiveServiceIT {
   }
 
   @Test
-  public void reactivateSession_Should_ThrowForbiddenException_WhenUserHasNoPermission() {
+  void reactivateSession_Should_ThrowForbiddenException_WhenUserHasNoPermission() {
     assertThrows(
         ForbiddenException.class,
         () -> {
@@ -146,7 +145,7 @@ public class SessionArchiveServiceIT {
   }
 
   @Test
-  public void reactivateSession_Should_ThrowConflictException_WhenSessionIsNotInArchive() {
+  void reactivateSession_Should_ThrowConflictException_WhenSessionIsNotInArchive() {
     assertThrows(
         ConflictException.class,
         () -> {
