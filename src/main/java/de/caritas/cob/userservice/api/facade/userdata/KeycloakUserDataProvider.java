@@ -32,7 +32,6 @@ public class KeycloakUserDataProvider {
         .email(keycloakUser.getEmail())
         .encourage2fa(false)
         .absenceMessage("")
-        .isInTeamAgency(false)
         .agencies(Lists.newArrayList())
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())

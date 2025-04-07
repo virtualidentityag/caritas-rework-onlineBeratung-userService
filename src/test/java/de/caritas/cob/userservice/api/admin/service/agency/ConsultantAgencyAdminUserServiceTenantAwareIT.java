@@ -2,17 +2,12 @@ package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.util.Sets;
@@ -48,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @TestPropertySource(properties = "multitenancy.enabled=true")
 @Transactional
-public class ConsultantAgencyAdminUserServiceTenantAwareIT {
+class ConsultantAgencyAdminUserServiceTenantAwareIT {
 
   public static final String CONSULTANT1_ID = "0b3b1cc6-be98-4787-aa56-212259d811b8";
   public static final String CONSULTANT2_ID = "0b3b1cc6-be98-4787-aa56-212259d811b7";
@@ -65,25 +60,23 @@ public class ConsultantAgencyAdminUserServiceTenantAwareIT {
 
   @MockBean private AgencyAdminService agencyAdminService;
 
-  @MockBean private RemoveConsultantFromRocketChatService removeConsultantFromRocketChatService;
-
   private final EasyRandom easyRandom = new EasyRandom();
 
   private Set<String> consultantsToRemove = Sets.newHashSet();
 
   @BeforeEach
-  public void beforeTests() {
+  void beforeTests() {
     TenantContext.setCurrentTenant(1L);
   }
 
   @AfterEach
-  public void afterTests() {
+  void afterTests() {
     consultantsToRemove.stream().forEach(id -> consultantRepository.deleteById(id));
     TenantContext.clear();
   }
 
   @Test
-  public void
+  void
       findConsultantAgencies_Should_returnAllConsultantAgenciesForGivenConsultantId_with_correctConsultantId() {
     givenAValidConsultantPersisted(CONSULTANT1_ID);
     var agencyAdminResponseDTO = new EasyRandom().nextObject(AgencyAdminResponseDTO.class);
@@ -104,7 +97,7 @@ public class ConsultantAgencyAdminUserServiceTenantAwareIT {
   }
 
   @Test
-  public void findConsultantAgencies_Should_returnFullMappedSessionAdminDTO() {
+  void findConsultantAgencies_Should_returnFullMappedSessionAdminDTO() {
     givenAValidConsultantPersisted(CONSULTANT2_ID);
     var agencyAdminResponseDTO = new EasyRandom().nextObject(AgencyAdminResponseDTO.class);
     agencyAdminResponseDTO.setId(1L);
@@ -122,7 +115,7 @@ public class ConsultantAgencyAdminUserServiceTenantAwareIT {
   }
 
   @Test
-  public void findConsultantAgencies_Should_returnEmptyResult_with_incorrectConsultantId() {
+  void findConsultantAgencies_Should_returnEmptyResult_with_incorrectConsultantId() {
     try {
       givenAValidConsultantPersisted(CONSULTANT1_ID);
       consultantAgencyAdminService.findConsultantAgencies("12345678-1234-1234-1234-1234567890ab");
@@ -136,66 +129,13 @@ public class ConsultantAgencyAdminUserServiceTenantAwareIT {
   }
 
   @Test
-  public void
-      markAllAssignedConsultantsAsTeamConsultant_Should_markAssignedConsultantsAsTeamConsultant() {
+  void
+      markConsultantAgencyForDeletion_Should_setDeletedFlagInDatabase_When_consultantAgencyCanBeDeleted() {
     givenAValidConsultantPersisted(CONSULTANT1_ID);
-    long teamConsultantsBefore =
-        this.consultantRepository
-            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
-            .stream()
-            .filter(Consultant::isTeamConsultant)
-            .count();
-
-    this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(1L);
-
-    long teamConsultantsAfter =
-        this.consultantRepository
-            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
-            .stream()
-            .filter(Consultant::isTeamConsultant)
-            .count();
-
-    assertThat(teamConsultantsAfter, is(not(teamConsultantsBefore)));
-    assertThat(teamConsultantsAfter, is(greaterThan(teamConsultantsBefore)));
-  }
-
-  @Test
-  public void
-      removeConsultantsFromTeamSessionsByAgencyId_Should_removeTeamConsultantFlagAndCallServices() {
-    givenAValidConsultantPersisted(CONSULTANT1_ID, true);
-    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().teamAgency(false));
-
-    long teamCosnultantsBefore =
-        this.consultantRepository
-            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
-            .stream()
-            .filter(Consultant::isTeamConsultant)
-            .count();
-
-    this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(1L);
-
-    long teamConsultantsAfter =
-        this.consultantRepository
-            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
-            .stream()
-            .filter(Consultant::isTeamConsultant)
-            .count();
-
-    assertThat(teamConsultantsAfter, is(not(teamCosnultantsBefore)));
-    assertThat(teamConsultantsAfter, is(lessThan(teamCosnultantsBefore)));
-    verify(this.removeConsultantFromRocketChatService, times(1))
-        .removeConsultantFromSessions(any());
-  }
-
-  @Test
-  public void
-      markConsultantAgencyForDeletion_Should_setDeletedFlagIndatabase_When_consultantAgencyCanBeDeleted() {
-    givenAValidConsultantPersisted(CONSULTANT1_ID, true);
     ConsultantAgency validRelation = this.consultantAgencyRepository.findAll().iterator().next();
     String consultantId = validRelation.getConsultant().getId();
     Long agencyId = validRelation.getAgencyId();
-    when(this.agencyService.getAgencyWithoutCaching(any()))
-        .thenReturn(new AgencyDTO().teamAgency(false));
+    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(new AgencyDTO());
 
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
 
@@ -205,8 +145,7 @@ public class ConsultantAgencyAdminUserServiceTenantAwareIT {
   }
 
   @Test
-  public void
-      findConsultantsForAgency_Should_returnExpectedConsultants_When_agencyHasConsultatns() {
+  void findConsultantsForAgency_Should_returnExpectedConsultants_When_agencyHasConsultatns() {
     givenAValidConsultantPersisted(CONSULTANT1_ID);
     givenAValidConsultantPersisted(CONSULTANT2_ID);
     var consultantsOfAgency = this.consultantAgencyAdminService.findConsultantsForAgency(1L);
@@ -226,16 +165,12 @@ public class ConsultantAgencyAdminUserServiceTenantAwareIT {
             });
   }
 
-  private Consultant givenAValidConsultantPersisted(String id, boolean isTeamConsultant) {
-    Consultant consultant = givenAValidConsultant(id, isTeamConsultant);
+  private Consultant givenAValidConsultantPersisted(String id) {
+    Consultant consultant = givenAValidConsultant(id);
     consultant.setLanguages(Set.of(new Language(consultant, LanguageCode.getByCode("de"))));
     consultant = consultantRepository.save(consultant);
     assignConsultantToAgency(consultant);
     return consultant;
-  }
-
-  private Consultant givenAValidConsultantPersisted(String id) {
-    return givenAValidConsultantPersisted(id, false);
   }
 
   private void assignConsultantToAgency(Consultant consultant) {
@@ -247,7 +182,7 @@ public class ConsultantAgencyAdminUserServiceTenantAwareIT {
     consultantAgencyRepository.save(consultantAgency);
   }
 
-  private Consultant givenAValidConsultant(String id, boolean isTeamConsultant) {
+  private Consultant givenAValidConsultant(String id) {
     Consultant consultant = new Consultant();
     consultant.setAppointments(null);
     consultant.setTenantId(1L);
@@ -262,7 +197,6 @@ public class ConsultantAgencyAdminUserServiceTenantAwareIT {
     consultant.setNotifyEnquiriesRepeating(true);
     consultant.setNotifyNewChatMessageFromAdviceSeeker(true);
     consultant.setWalkThroughEnabled(true);
-    consultant.setTeamConsultant(isTeamConsultant);
     consultant.setConsultantMobileTokens(Sets.newHashSet());
     consultant.setLanguageCode(LanguageCode.de);
 

@@ -95,7 +95,6 @@ class ConsultantDataProviderTest {
         Set.of(CONSULTANT_WITH_AGENCY.getLanguages().iterator().next().getLanguageCode().name()),
         result.getLanguages());
     assertEquals(CONSULTANT_WITH_AGENCY.isAbsent(), result.isAbsent());
-    assertEquals(CONSULTANT_WITH_AGENCY.isTeamConsultant(), result.isInTeamAgency());
     assertEquals(
         GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT,
         result.getGrantedAuthorities().stream().findFirst().orElse(null));
@@ -108,7 +107,6 @@ class ConsultantDataProviderTest {
   @Test
   void retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasRegisteredSessions() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
-    consultant.setTeamConsultant(false);
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(), any()))
@@ -122,7 +120,6 @@ class ConsultantDataProviderTest {
   @Test
   void retrieveData_Should_returnDataWithHasArchiveFalse_When_ConsultantHasNoRegisteredSessions() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
-    consultant.setTeamConsultant(false);
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(), any()))
@@ -131,21 +128,6 @@ class ConsultantDataProviderTest {
     var result = underTest.retrieveData(consultant);
 
     assertFalse(result.isHasArchive());
-  }
-
-  @Test
-  void
-      retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasNoRegisteredSessionsButIsTeamConsultant() {
-    Consultant consultant = easyRandom.nextObject(Consultant.class);
-    consultant.setTeamConsultant(true);
-    when(this.agencyService.getAgencies(any()))
-        .thenReturn(List.of(new AgencyDTO().consultingType(1)));
-    when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(), any()))
-        .thenReturn(5L);
-
-    var result = underTest.retrieveData(consultant);
-
-    assertTrue(result.isHasArchive());
   }
 
   @Test

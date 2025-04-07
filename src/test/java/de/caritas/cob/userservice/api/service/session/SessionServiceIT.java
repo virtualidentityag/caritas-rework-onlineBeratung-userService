@@ -32,7 +32,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
@@ -107,7 +106,6 @@ class SessionServiceIT {
 
     assertNotNull(result);
     assertEquals(session.getId(), result.getId());
-    assertEquals(session.isTeamSession(), result.getIsTeamSession());
     assertEquals(session.getAgencyId(), result.getAgencyId());
     assertEquals(session.getConsultant().getId(), result.getConsultantId());
     assertEquals(session.getConsultant().getRocketChatId(), result.getConsultantRcId());
@@ -136,18 +134,6 @@ class SessionServiceIT {
     assertEquals(2, result.getTopics().get(1).getId());
     assertEquals("topic name 2", result.getTopics().get(1).getName());
     assertEquals("topic desc 2", result.getTopics().get(1).getDescription());
-  }
-
-  @Test
-  @Transactional
-  void
-      fetchSessionForConsultant_Should_Return_ConsultantSessionDTO_When_ConsultantIsToTeamSessionAgencyAssigned() {
-    givenAValidTopicServiceResponse();
-    Consultant consultant =
-        consultantRepository
-            .findByIdAndDeleteDateIsNull("e2f20d3a-1ca7-4cb5-9fac-8e26033416b3")
-            .get();
-    assertNotNull(sessionService.fetchSessionForConsultant(2L, consultant));
   }
 
   @Test

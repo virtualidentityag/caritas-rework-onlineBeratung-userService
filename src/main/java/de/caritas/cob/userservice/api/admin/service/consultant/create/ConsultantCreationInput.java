@@ -23,8 +23,6 @@ interface ConsultantCreationInput {
 
   String getAbsenceMessage();
 
-  boolean isTeamConsultant();
-
   boolean isLanguageFormal();
 
   default LocalDateTime getCreateDate() {

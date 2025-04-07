@@ -1,11 +1,8 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
-import static de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
-import static de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
@@ -166,21 +163,6 @@ public class ConsultantAdminFacade {
       String consultantId, CreateConsultantAgencyDTO createConsultantAgencyDTO) {
     consultantAgencyRelationCreatorService.createNewConsultantAgency(
         consultantId, createConsultantAgencyDTO);
-  }
-
-  /**
-   * Changes the consultant flag is_team_consultant and assignments for agency type changes.
-   *
-   * @param agencyId the id of the changed agency
-   * @param agencyTypeDTO the request object containing the target type
-   */
-  public void changeAgencyType(Long agencyId, AgencyTypeDTO agencyTypeDTO) {
-    if (TEAM_AGENCY.equals(agencyTypeDTO.getAgencyType())) {
-      this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(agencyId);
-    }
-    if (DEFAULT_AGENCY.equals(agencyTypeDTO.getAgencyType())) {
-      this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(agencyId);
-    }
   }
 
   /**

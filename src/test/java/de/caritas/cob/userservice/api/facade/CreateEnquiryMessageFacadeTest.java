@@ -154,7 +154,6 @@ class CreateEnquiryMessageFacadeTest {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-          .notifications(null)
           .languageFormal(false)
           .roles(null)
           .registration(null);

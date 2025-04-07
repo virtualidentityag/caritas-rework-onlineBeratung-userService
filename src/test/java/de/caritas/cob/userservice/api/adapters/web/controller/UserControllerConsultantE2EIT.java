@@ -316,8 +316,6 @@ class UserControllerConsultantE2EIT {
             .andExpect(jsonPath("_embedded[0]._embedded.absent", not(contains(nullValue()))))
             .andExpect(
                 jsonPath("_embedded[0]._embedded.formalLanguage", not(contains(nullValue()))))
-            .andExpect(
-                jsonPath("_embedded[0]._embedded.teamConsultant", not(contains(nullValue()))))
             .andExpect(jsonPath("_embedded[0]._embedded.createDate", not(contains(nullValue()))))
             .andExpect(jsonPath("_embedded[0]._embedded.updateDate", not(contains(nullValue()))))
             .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
@@ -332,9 +330,6 @@ class UserControllerConsultantE2EIT {
             .andExpect(
                 jsonPath(
                     "_embedded[0]._embedded.agencies[0].description", not(contains(nullValue()))))
-            .andExpect(
-                jsonPath(
-                    "_embedded[0]._embedded.agencies[0].teamAgency", not(contains(nullValue()))))
             .andExpect(
                 jsonPath("_embedded[0]._embedded.agencies[0].offline", not(contains(nullValue()))))
             .andExpect(
@@ -352,9 +347,6 @@ class UserControllerConsultantE2EIT {
             .andExpect(
                 jsonPath(
                     "_embedded[9]._embedded.agencies[0].description", not(contains(nullValue()))))
-            .andExpect(
-                jsonPath(
-                    "_embedded[9]._embedded.agencies[0].teamAgency", not(contains(nullValue()))))
             .andExpect(
                 jsonPath("_embedded[9]._embedded.agencies[0].offline", not(contains(nullValue()))))
             .andExpect(
@@ -879,7 +871,6 @@ class UserControllerConsultantE2EIT {
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].city", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].description", is(notNullValue())))
-        .andExpect(jsonPath("agencies[0].teamAgency", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].topicIds", is(notNullValue())));
@@ -908,7 +899,6 @@ class UserControllerConsultantE2EIT {
         .andExpect(jsonPath("consultantRcId", is("CztX9SWF4SJPvgknZ")))
         .andExpect(jsonPath("askerId", is("06c6601f-a5b4-4812-9260-20065390b1f5")))
         .andExpect(jsonPath("askerUserName", is("enc.OUZDK5DFON2DGNJVGU2Q....")))
-        .andExpect(jsonPath("isTeamSession", is(true)))
         .andExpect(jsonPath("postcode", is("12345")))
         .andExpect(jsonPath("age", is(15)))
         .andExpect(jsonPath("gender", is("FEMALE")))
@@ -944,9 +934,7 @@ class UserControllerConsultantE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void
-      fetchSessionForConsultantShouldRespondForbiddenWhenSessionIsInAdviceAndTeamSessionNotInAgency()
-          throws Exception {
+  void fetchSessionForConsultantShouldRespondForbiddenWhenSessionIsInAdvice() throws Exception {
     givenAConsultantWithAAdvisedSession(true);
 
     mockMvc
@@ -1036,7 +1024,6 @@ class UserControllerConsultantE2EIT {
       consultant.setAbsenceMessage(RandomStringUtils.randomAlphabetic(8));
       consultant.setAbsent(easyRandom.nextBoolean());
       consultant.setLanguageFormal(easyRandom.nextBoolean());
-      consultant.setTeamConsultant(easyRandom.nextBoolean());
 
       consultantRepository.save(consultant);
       consultantIdsToDelete.add(consultant.getId());
@@ -1107,7 +1094,6 @@ class UserControllerConsultantE2EIT {
           agency.setPostcode(RandomStringUtils.randomNumeric(5));
           agency.setCity(RandomStringUtils.randomNumeric(8));
           agency.setDescription(RandomStringUtils.randomNumeric(8));
-          agency.setTeamAgency(easyRandom.nextBoolean());
           agency.setOffline(easyRandom.nextBoolean());
           agency.setConsultingType(easyRandom.nextInt());
           agencies.add(agency);

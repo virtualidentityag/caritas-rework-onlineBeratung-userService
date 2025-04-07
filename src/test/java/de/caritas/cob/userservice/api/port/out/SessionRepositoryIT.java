@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.port.out;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.neovisionaries.i18n.LanguageCode;
@@ -59,7 +58,6 @@ class SessionRepositoryIT {
     assertEquals(2, sessionData.size());
     assertEquals(sessionData.get(0), foundSession.getSessionData().get(0));
     assertEquals(sessionData.get(1), foundSession.getSessionData().get(1));
-    assertFalse(foundSession.isTeamSession());
   }
 
   private void givenValidSession() {

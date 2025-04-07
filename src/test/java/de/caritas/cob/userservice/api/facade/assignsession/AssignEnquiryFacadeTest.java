@@ -13,9 +13,7 @@ import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -155,9 +153,8 @@ class AssignEnquiryFacadeTest {
   }
 
   @Test
-  void assignEnquiry_Should_removeAllUnauthorizedMembers_When_sessionIsNotATeamSession() {
+  void assignEnquiry_Should_removeAllUnauthorizedMembers() {
     Session session = new EasyRandom().nextObject(Session.class);
-    session.setTeamSession(false);
     session.setStatus(SessionStatus.NEW);
     session.setConsultant(null);
     session.getUser().setRcUserId("userRcId");
@@ -187,48 +184,5 @@ class AssignEnquiryFacadeTest {
             verify(this.rocketChatFacade, times(1))
                 .removeUserFromGroupIgnoreGroupNotFound(
                     consultantToRemove.getRocketChatId(), session.getGroupId()));
-  }
-
-  @Test
-  void assignEnquiry_ShouldNot_removeTeamMembers_When_sessionIsTeamSession() {
-    Session session = new EasyRandom().nextObject(Session.class);
-    session.setTeamSession(false);
-    session.setStatus(SessionStatus.NEW);
-    session.setConsultant(null);
-    session.getUser().setRcUserId("userRcId");
-    session.setRegistrationType(RegistrationType.REGISTERED);
-    session.setAgencyId(CURRENT_TENANT_ID);
-    ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
-    consultantAgency.setAgencyId(CURRENT_TENANT_ID);
-    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
-    consultant.setConsultantAgencies(asSet(consultantAgency));
-    consultant.setRocketChatId("newConsultantRcId");
-    when(this.rocketChatFacade.retrieveRocketChatMembers(anyString()))
-        .thenReturn(
-            asList(
-                new GroupMemberDTO("userRcId", null, "name", null, null),
-                new GroupMemberDTO("newConsultantRcId", null, "name", null, null),
-                new GroupMemberDTO("otherRcId", null, "name", null, null),
-                new GroupMemberDTO("teamConsultantRcId", null, "name", null, null),
-                new GroupMemberDTO("teamConsultantRcId2", null, "name", null, null)));
-    Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
-    consultantToRemove.setRocketChatId("otherRcId");
-    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any()))
-        .thenReturn(List.of(consultantToRemove));
-
-    this.assignEnquiryFacade.assignRegisteredEnquiry(session, consultant);
-
-    verifyConsultantAndSessionHaveBeenChecked(session, consultant);
-    verifyAsync(
-        (a) ->
-            verify(this.rocketChatFacade, atLeastOnce())
-                .removeUserFromGroupIgnoreGroupNotFound(
-                    consultantToRemove.getRocketChatId(), session.getGroupId()));
-    verifyAsync(
-        (a) ->
-            verify(this.rocketChatFacade, never())
-                .removeUserFromGroup("teamConsultantRcId", session.getGroupId()));
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId2", session.getGroupId());
   }
 }

@@ -286,9 +286,6 @@ components:
             slug:
               type: string
               example: part-of-url
-            excludeNonMainConsultantsFromTeamSessions:
-              type: boolean
-              example: true
             whiteSpot:
               allOf:
                 - $ref: '#/components/schemas/WhiteSpotDTO'
@@ -306,9 +303,6 @@ components:
                 - $ref: '#/components/schemas/SessionDataInitializingDTO'
             roles:
               $ref: '#/components/schemas/RolesDTO'
-            notifications:
-              allOf:
-                - $ref: '#/components/schemas/NotificationsDTO'
 
     FullConsultingTypeResponseDTO:
       type: object
@@ -335,9 +329,6 @@ components:
         slug:
           type: string
           example: part-of-url
-        excludeNonMainConsultantsFromTeamSessions:
-          type: boolean
-          example: true
         isSubsequentRegistrationAllowed:
           type: boolean
           example: true
@@ -379,9 +370,6 @@ components:
             - $ref: '#/components/schemas/SessionDataInitializingDTO'
         roles:
           $ref: '#/components/schemas/RolesDTO'
-        notifications:
-          allOf:
-            - $ref: '#/components/schemas/NotificationsDTO'
         requiredComponents:
           $ref: '#/components/schemas/RequiredComponentsDTO'
 
@@ -507,27 +495,6 @@ components:
           items:
             type: string
 
-    NotificationsDTO:
-      type: object
-      properties:
-        teamSessions:
-          allOf:
-            - $ref: '#/components/schemas/TeamSessionsDTO'
-
-    TeamSessionsDTO:
-      type: object
-      properties:
-        newMessage:
-          allOf:
-            - $ref: '#/components/schemas/NewMessageDTO'
-
-    NewMessageDTO:
-      type: object
-      properties:
-        allTeamConsultants:
-          type: "boolean"
-          example: true
-
     RequiredComponentsDTO:
       type: object
       properties:
@@ -601,6 +568,3 @@ components:
         welcomeMessage:
           allOf:
             - $ref: '#/components/schemas/WelcomeMessageDTO'
-        notifications:
-          allOf:
-            - $ref: '#/components/schemas/NotificationsDTO'

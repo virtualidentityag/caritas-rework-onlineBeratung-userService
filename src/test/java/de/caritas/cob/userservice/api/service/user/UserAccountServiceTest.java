@@ -21,7 +21,6 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
-import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.userdata.EmailNotificationMapper;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -141,31 +140,6 @@ public class UserAccountServiceTest {
           when(consultantService.getConsultant(any())).thenReturn(Optional.empty());
 
           this.accountProvider.retrieveValidatedConsultant();
-        });
-  }
-
-  @Test
-  public void
-      retrieveValidatedTeamConsultant_Should_ReturnTeamConsultant_When_TeamConsultantIsPresent() {
-    Consultant teamConsultantMock = mock(Consultant.class);
-    when(teamConsultantMock.isTeamConsultant()).thenReturn(true);
-    when(consultantService.getConsultant(any())).thenReturn(Optional.of(teamConsultantMock));
-
-    Consultant resultUser = this.accountProvider.retrieveValidatedTeamConsultant();
-
-    assertThat(resultUser).isEqualTo(teamConsultantMock);
-  }
-
-  @Test
-  public void
-      retrieveValidatedTeamConsultant_Should_Throw_ForbiddenException_When_ConsultantIsNotATeamConsultant() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          Consultant consultantMock = mock(Consultant.class);
-          when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultantMock));
-
-          this.accountProvider.retrieveValidatedTeamConsultant();
         });
   }
 
