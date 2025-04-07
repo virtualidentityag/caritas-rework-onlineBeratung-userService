@@ -79,7 +79,7 @@ public class CreateSessionFacade {
   }
 
   /**
-   * Creates a new session for the provided user and assignes it to given consultant.
+   * Creates a new session for the provided user and assign it to given consultant.
    *
    * @param userDTO {@link UserDTO}
    * @param user {@link User}

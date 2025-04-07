@@ -178,7 +178,7 @@ public class CreateChatV2FacadeTest {
     when(groupDTO.getId()).thenReturn(RC_GROUP_ID);
     when(chatService.saveChat(Mockito.any())).thenReturn(chat);
 
-    createChatFacade.createChatV1(CHAT_DTO, consultant);
+    createChatFacade.createChatV2(CHAT_DTO, consultant);
 
     InOrder inOrder = Mockito.inOrder(chat, chatService);
     inOrder.verify(chat, times(1)).setGroupId(RC_GROUP_ID);

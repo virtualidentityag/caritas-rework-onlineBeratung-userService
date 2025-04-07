@@ -204,22 +204,6 @@ class ChatPermissionVerifierTest {
   }
 
   @Test
-  void verifyPermissionForChat_Should_verifyUserPermission_When_ChatAgenciesContainUserAgency() {
-    User user = new User();
-    UserAgency userAgency = new UserAgency();
-    userAgency.setAgencyId(1L);
-    user.setUserAgencies(asSet(userAgency));
-    ChatAgency chatAgency = new ChatAgency();
-    chatAgency.setAgencyId(1L);
-    Chat chat = new Chat();
-    chat.setChatAgencies(asSet(chatAgency));
-    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
-    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
-
-    assertDoesNotThrow(() -> this.chatPermissionVerifier.verifyPermissionForChat(chat));
-  }
-
-  @Test
   void verifyPermissionForChat_Should_verifyUserPermission_When_UserHasUserChatAssignment() {
     UserChat userChat = UserChat.builder().chat(chat).user(user).build();
     when(chat.getChatUsers()).thenReturn(Set.of(userChat));

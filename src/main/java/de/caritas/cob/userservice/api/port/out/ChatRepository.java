@@ -15,15 +15,6 @@ public interface ChatRepository extends CrudRepository<Chat, Long> {
       value =
           "SELECT c.id, c.topic, c.consulting_type, c.initial_start_date, c.start_date, "
               + "c.duration, c.is_repetitive, c.chat_interval, c.is_active, c.max_participants, "
-              + "c.consultant_id_owner, c.rc_group_id, c.update_date, c.create_date, c.hint_message FROM chat c JOIN chat_agency ca ON c"
-              + ".id = ca.chat_id JOIN user_agency ua ON ca.agency_id = ua.agency_id AND ua.user_id = :user_id",
-      nativeQuery = true)
-  List<Chat> findByUserId(@Param(value = "user_id") String userId);
-
-  @Query(
-      value =
-          "SELECT c.id, c.topic, c.consulting_type, c.initial_start_date, c.start_date, "
-              + "c.duration, c.is_repetitive, c.chat_interval, c.is_active, c.max_participants, "
               + "c.consultant_id_owner, c.rc_group_id, c.update_date, c.create_date, c.hint_message FROM chat c "
               + "JOIN user_chat uc ON c.id = uc.chat_id AND uc.user_id = :user_id",
       nativeQuery = true)
