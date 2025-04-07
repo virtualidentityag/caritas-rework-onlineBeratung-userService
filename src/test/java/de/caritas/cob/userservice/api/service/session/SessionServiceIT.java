@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.api.UserServiceApplication;
@@ -17,7 +16,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
@@ -61,7 +59,7 @@ class SessionServiceIT {
   private AgencyControllerApi agencyControllerApi;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     when(topicServiceApiControllerFactory.createControllerApi()).thenReturn(topicControllerApi);
     when(agencyServiceApiControllerFactory.createControllerApi()).thenReturn(agencyControllerApi);
     when(agencyControllerApi.getApiClient()).thenReturn(new ApiClient());
@@ -158,28 +156,6 @@ class SessionServiceIT {
         sessionService.findGroupIdByConsultantAndUser(
             "473f7c4b-f011-4fc2-847c-ceb636a5b399", "1da238c6-cd46-4162-80f1-bff74eafe77f");
     assertEquals("4WKq3kj9C7WESSQuK", groupId);
-  }
-
-  @Test
-  void fetchGroupIdWithConsultantAndUser_Should_Return_BadRequestException() {
-    Session session = new Session();
-    session.setConsultant(
-        consultantRepository.findById("473f7c4b-f011-4fc2-847c-ceb636a5b399").get());
-    session.setUser(userRepository.findById("1da238c6-cd46-4162-80f1-bff74eafe77f").get());
-    session.setConsultingTypeId(9);
-    session.setLanguageCode(LanguageCode.de);
-    session.setPostcode("12345");
-    session.setRegistrationType(RegistrationType.ANONYMOUS);
-    session.setIsConsultantDirectlySet(false);
-    sessionService.saveSession(session);
-    assertThrows(
-        javax.ws.rs.BadRequestException.class,
-        () -> {
-          sessionService.findGroupIdByConsultantAndUser(
-              "473f7c4b-f011-4fc2-847c-ceb636a5b399", "1da238c6-cd46-4162-80f1-bff74eafe77f");
-        });
-
-    sessionRepository.delete(session);
   }
 
   private void givenAValidTopicServiceResponse() {

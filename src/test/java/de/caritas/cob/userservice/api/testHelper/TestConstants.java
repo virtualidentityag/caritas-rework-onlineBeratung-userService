@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.testHelper;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
@@ -770,21 +769,6 @@ public class TestConstants {
           .createDate(nowInUtc())
           .updateDate(nowInUtc())
           .teamSession(true)
-          .build();
-
-  public static final Session ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT =
-      Session.builder()
-          .id(SESSION_ID)
-          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
-          .registrationType(ANONYMOUS)
-          .agencyId(AGENCY_ID)
-          .enquiryMessageDate(nowInUtc())
-          .groupId(RC_GROUP_ID)
-          .postcode(POSTCODE)
-          .status(NEW)
-          .createDate(nowInUtc())
-          .updateDate(nowInUtc())
-          .teamSession(false)
           .build();
 
   public static final Session SESSION_WITHOUT_CONSULTANT =

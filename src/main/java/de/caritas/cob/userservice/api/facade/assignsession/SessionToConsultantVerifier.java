@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
-import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -45,9 +44,6 @@ public class SessionToConsultantVerifier {
     verifyUserAndConsultantHaveRocketChatId(consultantSessionDTO);
     if (REGISTERED.equals(consultantSessionDTO.getSession().getRegistrationType())) {
       verifyIfConsultantIsAssignedToAgency(consultantSessionDTO);
-    }
-    if (ANONYMOUS.equals(consultantSessionDTO.getSession().getRegistrationType())) {
-      verifyIfConsultantHasConsultingTypeOfSession(consultantSessionDTO);
     }
   }
 
@@ -113,21 +109,6 @@ public class SessionToConsultantVerifier {
           String.format(
               "Agency %s of session %s is not assigned to consultant %s.",
               consultantSessionDTO.getSession().getAgencyId().toString(),
-              consultantSessionDTO.getSession().getId().toString(),
-              consultantSessionDTO.getConsultant().getId());
-
-      throw new ForbiddenException(message, LogService::logAssignSessionFacadeWarning);
-    }
-  }
-
-  private void verifyIfConsultantHasConsultingTypeOfSession(
-      ConsultantSessionDTO consultantSessionDTO) {
-    if (this.conditionProvider.isSessionsConsultingTypeNotAvailableForConsultant(
-        consultantSessionDTO.getConsultant(), consultantSessionDTO.getSession())) {
-      var message =
-          String.format(
-              "Consulting type %s of session %s is not available for consultant %s.",
-              consultantSessionDTO.getSession().getConsultingTypeId(),
               consultantSessionDTO.getSession().getId().toString(),
               consultantSessionDTO.getConsultant().getId());
 

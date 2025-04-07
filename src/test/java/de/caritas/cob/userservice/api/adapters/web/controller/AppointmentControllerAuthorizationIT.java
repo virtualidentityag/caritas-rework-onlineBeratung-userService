@@ -43,12 +43,12 @@ class AppointmentControllerAuthorizationIT {
   private Appointment appointment;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
   }
 
   @AfterEach
-  public void cleanUp() {
+  void cleanUp() {
     appointment = null;
   }
 
@@ -91,7 +91,6 @@ class AppointmentControllerAuthorizationIT {
   @Test
   @WithMockUser(
       authorities = {
-        AuthorityValue.ANONYMOUS_DEFAULT,
         AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
         AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
         AuthorityValue.CREATE_NEW_CHAT,
@@ -138,7 +137,6 @@ class AppointmentControllerAuthorizationIT {
   @Test
   @WithMockUser(
       authorities = {
-        AuthorityValue.ANONYMOUS_DEFAULT,
         AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
         AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
         AuthorityValue.CREATE_NEW_CHAT,
@@ -181,7 +179,6 @@ class AppointmentControllerAuthorizationIT {
   @Test
   @WithMockUser(
       authorities = {
-        AuthorityValue.ANONYMOUS_DEFAULT,
         AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
         AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
         AuthorityValue.CREATE_NEW_CHAT,
@@ -223,7 +220,6 @@ class AppointmentControllerAuthorizationIT {
   @Test
   @WithMockUser(
       authorities = {
-        AuthorityValue.ANONYMOUS_DEFAULT,
         AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
         AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
         AuthorityValue.CREATE_NEW_CHAT,

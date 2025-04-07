@@ -8,7 +8,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
 /** Provider for consultant information. */
 @Component
@@ -19,14 +18,8 @@ public class KeycloakUserDataProvider {
   private final @NonNull IdentityClient identityClient;
 
   public UserDataResponseDTO retrieveAuthenticatedUserData() {
-    assertCalledInAuthenticatedUserContext();
     var user = identityClient.getById(authenticatedUser.getUserId());
     return userDataResponseDtoOf(user);
-  }
-
-  private void assertCalledInAuthenticatedUserContext() {
-    Assert.isTrue(
-        !authenticatedUser.isAnonymous(), "Cannot retrieve keycloak data for anonymous users");
   }
 
   private UserDataResponseDTO userDataResponseDtoOf(UserRepresentation keycloakUser) {
@@ -43,7 +36,6 @@ public class KeycloakUserDataProvider {
         .agencies(Lists.newArrayList())
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
-        .hasAnonymousConversations(false)
         .hasArchive(false)
         .build();
   }

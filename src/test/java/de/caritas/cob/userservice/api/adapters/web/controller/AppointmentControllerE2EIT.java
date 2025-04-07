@@ -41,7 +41,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.mockito.ArgumentMatchers;
-import org.mockito.MockitoAnnotations;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,8 +96,7 @@ class AppointmentControllerE2EIT {
   @Autowired private AppointmentController appointmentController;
 
   @BeforeEach
-  public void setUp() {
-    MockitoAnnotations.initMocks(this);
+  void setUp() {
     this.mockMvc =
         MockMvcBuilders.standaloneSetup(appointmentController)
             .setHandlerExceptionResolvers(withExceptionControllerAdvice())
@@ -127,7 +125,7 @@ class AppointmentControllerE2EIT {
   }
 
   @AfterEach
-  public void reset() {
+  void reset() {
     appointment = null;
     savedAppointment = null;
     appointmentRepository.deleteAll();
@@ -175,26 +173,6 @@ class AppointmentControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
   void getAppointmentShouldReturnOkAndOnlyStatusForAdviceSeeker() throws Exception {
     givenAnAdviceSeeker();
-    givenAValidConsultant(false);
-    givenASavedAppointment();
-
-    mockMvc
-        .perform(
-            get("/appointments/{id}", savedAppointment.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("id", is(savedAppointment.getId().toString())))
-        .andExpect(jsonPath("status", is(savedAppointment.getStatus().toString().toLowerCase())))
-        .andExpect(jsonPath("description").isEmpty())
-        .andExpect(jsonPath("datetime").isEmpty());
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
-  void getAppointmentShouldReturnOkAndOnlyStatusForAnonymous() throws Exception {
-    givenAnAnonymousUser();
     givenAValidConsultant(false);
     givenASavedAppointment();
 
@@ -541,15 +519,6 @@ class AppointmentControllerE2EIT {
       when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
       when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
     }
-  }
-
-  private void givenAnAnonymousUser() {
-    when(authenticatedUser.getUserId()).thenReturn(UUID.randomUUID().toString());
-    when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
-    when(authenticatedUser.isConsultant()).thenReturn(false);
-    when(authenticatedUser.getUsername()).thenReturn(RandomStringUtils.randomAlphabetic(8));
-    when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
-    when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anotherAuthority"));
   }
 
   private void givenAnAdviceSeeker() {

@@ -64,7 +64,6 @@ public class UserDataResponseDTO {
   private Set<String> grantedAuthorities;
 
   private LinkedHashMap<String, Object> consultingTypes;
-  private boolean hasAnonymousConversations;
   private boolean hasArchive;
   private TwoFactorAuthDTO twoFactorAuth;
   private String displayName;

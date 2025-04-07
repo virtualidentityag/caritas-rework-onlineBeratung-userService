@@ -37,8 +37,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_U
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_UPDATE_KEY;
 import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_UPDATE_CHAT_BODY;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -60,10 +58,8 @@ import de.caritas.cob.userservice.api.adapters.web.dto.MobileTokenDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
-import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.facade.CreateSessionFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
@@ -77,7 +73,6 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
@@ -96,7 +91,6 @@ import de.caritas.cob.userservice.api.service.session.SessionTopicEnrichmentServ
 import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import javax.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -1063,7 +1057,6 @@ class UserControllerAuthorizationIT {
   @Test
   @WithMockUser(
       authorities = {
-        AuthorityValue.ANONYMOUS_DEFAULT,
         AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
         AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
         AuthorityValue.CONSULTANT_DEFAULT,
@@ -1985,7 +1978,6 @@ class UserControllerAuthorizationIT {
   @Test
   @WithMockUser(
       authorities = {
-        AuthorityValue.ANONYMOUS_DEFAULT,
         AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
         AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
         AuthorityValue.CREATE_NEW_CHAT,
@@ -2602,44 +2594,6 @@ class UserControllerAuthorizationIT {
                 .content(objectMapper.writeValueAsString(updateConsultantDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.ANONYMOUS_DEFAULT})
-  void getUserData_Should_ReturnOK_When_AnonymousAuthority() throws Exception {
-
-    when(this.authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
-    when(this.userAccountService.retrieveValidatedUser())
-        .thenReturn(new EasyRandom().nextObject(User.class));
-    when(askerDataProvider.retrieveData(any()))
-        .thenReturn(easyRandom.nextObject(UserDataResponseDTO.class));
-
-    mvc.perform(
-            get(PATH_GET_USER_DATA)
-                .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.ANONYMOUS_DEFAULT})
-  void getAskerSessions_Should_ReturnNoContent_When_AnonymousAuthority() throws Exception {
-
-    when(this.authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
-    when(this.userAccountService.retrieveValidatedUser())
-        .thenReturn(new EasyRandom().nextObject(User.class));
-
-    mvc.perform(
-            get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
   }
 
   @Test

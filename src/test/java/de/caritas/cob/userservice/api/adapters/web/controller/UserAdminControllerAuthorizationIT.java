@@ -475,7 +475,6 @@ class UserAdminControllerAuthorizationIT {
   @Test
   @WithMockUser(
       authorities = {
-        AuthorityValue.ANONYMOUS_DEFAULT,
         AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
         AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
         AuthorityValue.CONSULTANT_DEFAULT,
