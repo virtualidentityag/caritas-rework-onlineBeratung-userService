@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrel
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
@@ -100,11 +99,6 @@ public class ConsultantAgencyRelationCreatorService {
 
     rocketChatAsyncHelper.addConsultantToSessions(
         consultant, agency, logMethod, TenantContext.getCurrentTenant());
-
-    if (isTeamAgencyButNotTeamConsultant(agency, consultant)) {
-      consultant.setTeamConsultant(true);
-      consultantRepository.save(consultant);
-    }
   }
 
   private void ensureConsultingTypeRoles(ConsultantAgencyCreationInput input, AgencyDTO agency) {
@@ -166,10 +160,6 @@ public class ConsultantAgencyRelationCreatorService {
                         consultingTypeId, consultant.getId()));
               });
     }
-  }
-
-  private boolean isTeamAgencyButNotTeamConsultant(AgencyDTO agency, Consultant consultant) {
-    return isTrue(agency.getTeamAgency()) && !consultant.isTeamConsultant();
   }
 
   private ConsultantAgency buildConsultantAgency(Consultant consultant, Long agencyId) {

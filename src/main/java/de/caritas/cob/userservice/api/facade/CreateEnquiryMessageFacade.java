@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static java.util.Objects.nonNull;
 
 import com.neovisionaries.i18n.LanguageCode;
@@ -79,7 +78,6 @@ public class CreateEnquiryMessageFacade {
 
       var session =
           fetchSessionForEnquiryMessage(enquiryData.getSessionId(), enquiryData.getUser());
-      checkIfNotAnonymousEnquiry(session);
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
       var extendedConsultingTypeResponseDTO =
@@ -176,15 +174,6 @@ public class CreateEnquiryMessageFacade {
         String.format("Session %s not found for user %s", sessionId, user.getUserId()));
   }
 
-  private void checkIfNotAnonymousEnquiry(Session session) {
-    if (session.getRegistrationType().equals(ANONYMOUS)) {
-      throw new CreateEnquiryMessageException(
-          String.format(
-              "Session %s is anonymous and therefore can't have an enquiry message.",
-              session.getId()));
-    }
-  }
-
   private void checkIfEnquiryMessageIsAlreadyWrittenForSession(Session session) {
     if (nonNull(session.getEnquiryMessageDate())) {
       throw new ConflictException(
@@ -212,9 +201,8 @@ public class CreateEnquiryMessageFacade {
 
     try {
       addSystemUserToGroup(rcGroupId);
-      if (!ANONYMOUS.equals(session.getRegistrationType())) {
-        addConsultantsToGroup(rcGroupId, agencyList);
-      }
+      addConsultantsToGroup(rcGroupId, agencyList);
+
       rocketChatService.removeSystemMessages(
           rcGroupId, nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
 

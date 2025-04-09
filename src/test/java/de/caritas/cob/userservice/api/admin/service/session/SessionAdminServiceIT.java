@@ -50,7 +50,6 @@ public class SessionAdminServiceIT {
     assertThat(sessionAdminDTO.getConsultingType(), notNullValue());
     assertThat(sessionAdminDTO.getCreateDate(), notNullValue());
     assertThat(sessionAdminDTO.getEmail(), notNullValue());
-    assertThat(sessionAdminDTO.getIsTeamSession(), notNullValue());
     assertThat(sessionAdminDTO.getMessageDate(), notNullValue());
     assertThat(sessionAdminDTO.getPostcode(), notNullValue());
     assertThat(sessionAdminDTO.getUpdateDate(), notNullValue());

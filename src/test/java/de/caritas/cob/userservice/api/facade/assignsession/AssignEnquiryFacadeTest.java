@@ -1,25 +1,19 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
-import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.LIST_GROUP_MEMBER_DTO;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKET_CHAT_SYSTEM_USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_WITHOUT_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.U25_SESSION_WITHOUT_CONSULTANT;
 import static java.util.Arrays.asList;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -77,12 +71,12 @@ class AssignEnquiryFacadeTest {
   @Mock HttpServletRequest httpServletRequest;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     TenantContext.clear();
   }
 
@@ -159,9 +153,8 @@ class AssignEnquiryFacadeTest {
   }
 
   @Test
-  void assignEnquiry_Should_removeAllUnauthorizedMembers_When_sessionIsNotATeamSession() {
+  void assignEnquiry_Should_removeAllUnauthorizedMembers() {
     Session session = new EasyRandom().nextObject(Session.class);
-    session.setTeamSession(false);
     session.setStatus(SessionStatus.NEW);
     session.setConsultant(null);
     session.getUser().setRcUserId("userRcId");
@@ -191,94 +184,5 @@ class AssignEnquiryFacadeTest {
             verify(this.rocketChatFacade, times(1))
                 .removeUserFromGroupIgnoreGroupNotFound(
                     consultantToRemove.getRocketChatId(), session.getGroupId()));
-  }
-
-  @Test
-  void assignEnquiry_ShouldNot_removeTeamMembers_When_sessionIsTeamSession() {
-    Session session = new EasyRandom().nextObject(Session.class);
-    session.setTeamSession(false);
-    session.setStatus(SessionStatus.NEW);
-    session.setConsultant(null);
-    session.getUser().setRcUserId("userRcId");
-    session.setRegistrationType(RegistrationType.REGISTERED);
-    session.setAgencyId(CURRENT_TENANT_ID);
-    ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
-    consultantAgency.setAgencyId(CURRENT_TENANT_ID);
-    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
-    consultant.setConsultantAgencies(asSet(consultantAgency));
-    consultant.setRocketChatId("newConsultantRcId");
-    when(this.rocketChatFacade.retrieveRocketChatMembers(anyString()))
-        .thenReturn(
-            asList(
-                new GroupMemberDTO("userRcId", null, "name", null, null),
-                new GroupMemberDTO("newConsultantRcId", null, "name", null, null),
-                new GroupMemberDTO("otherRcId", null, "name", null, null),
-                new GroupMemberDTO("teamConsultantRcId", null, "name", null, null),
-                new GroupMemberDTO("teamConsultantRcId2", null, "name", null, null)));
-    Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
-    consultantToRemove.setRocketChatId("otherRcId");
-    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any()))
-        .thenReturn(List.of(consultantToRemove));
-
-    this.assignEnquiryFacade.assignRegisteredEnquiry(session, consultant);
-
-    verifyConsultantAndSessionHaveBeenChecked(session, consultant);
-    verifyAsync(
-        (a) ->
-            verify(this.rocketChatFacade, atLeastOnce())
-                .removeUserFromGroupIgnoreGroupNotFound(
-                    consultantToRemove.getRocketChatId(), session.getGroupId()));
-    verifyAsync(
-        (a) ->
-            verify(this.rocketChatFacade, never())
-                .removeUserFromGroup("teamConsultantRcId", session.getGroupId()));
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId2", session.getGroupId());
-  }
-
-  @Test
-  void assignAnonymousEnquiry_Should_AddConsultantToGroup_WhenSessionIsAnonymousConversation() {
-    assignEnquiryFacade.assignAnonymousEnquiry(
-        ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-
-    verifyConsultantAndSessionHaveBeenChecked(
-        ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-    verify(rocketChatFacade, times(1))
-        .addUserToRocketChatGroup(ROCKETCHAT_ID, ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT.getGroupId());
-  }
-
-  @Test
-  void assignAnonymousEnquiry_Should_RemoveSystemMessagesFromGroup() {
-    assignEnquiryFacade.assignAnonymousEnquiry(
-        ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-
-    verifyConsultantAndSessionHaveBeenChecked(
-        ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-    verify(rocketChatFacade, times(1)).removeSystemMessagesFromRocketChatGroup(anyString());
-  }
-
-  @Test
-  void
-      assignAnonymousEnquiry_Should_ReturnInternalServerErrorAndDoARollback_WhenAddConsultantToGroupFails() {
-    doThrow(new InternalServerErrorException(""))
-        .when(rocketChatFacade)
-        .addUserToRocketChatGroup(ROCKETCHAT_ID, RC_GROUP_ID);
-
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          assignEnquiryFacade.assignAnonymousEnquiry(
-              ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-        });
-
-    verifyConsultantAndSessionHaveBeenChecked(
-        ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-    verify(sessionService, times(1))
-        .updateConsultantAndStatusForSession(
-            ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT,
-            ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT.getConsultant(),
-            ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT.getStatus());
-    verify(sessionService, times(1))
-        .updateConsultantAndStatusForSession(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, null, NEW);
   }
 }

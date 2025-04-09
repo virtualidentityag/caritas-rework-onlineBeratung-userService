@@ -24,7 +24,6 @@ public class ConsultantTest {
           LASTNAME,
           "consultant@domain.de",
           false,
-          false,
           null,
           false,
           null,

@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -95,7 +94,6 @@ class ConsultantAgencyRelationCreatorServiceIT {
 
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
-    agencyDTO.setTeamAgency(false);
     agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
@@ -123,50 +121,6 @@ class ConsultantAgencyRelationCreatorServiceIT {
   }
 
   @Test
-  void
-      createNewConsultantAgency_Should_addConsultantToTeamSessionRocketChatGroups_When_ParamsAreValid() {
-
-    Consultant consultant = createConsultantWithoutAgencyAndSession();
-
-    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
-    createConsultantAgencyDTO.setAgencyId(15L);
-    createConsultantAgencyDTO.setRoleSetKey("valid-role-set");
-
-    when(keycloakService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
-    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
-        new ExtendedConsultingTypeResponseDTO();
-    AgencyDTO agencyDTO = new AgencyDTO();
-    agencyDTO.setId(15L);
-    agencyDTO.setTeamAgency(true);
-    agencyDTO.setConsultingType(0);
-    when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
-    when(consultingTypeManager.getConsultingTypeSettings(0))
-        .thenReturn(extendedConsultingTypeResponseDTO);
-
-    Session enquirySessionWithoutConsultant =
-        createSessionWithoutConsultant(agencyDTO.getId(), SessionStatus.IN_PROGRESS);
-
-    this.consultantAgencyRelationCreatorService.createNewConsultantAgency(
-        consultant.getId(), createConsultantAgencyDTO);
-
-    verify(rocketChatFacade, timeout(10000))
-        .addUserToRocketChatGroup(
-            consultant.getRocketChatId(), enquirySessionWithoutConsultant.getGroupId());
-
-    List<ConsultantAgency> result =
-        this.consultantAgencyRepository.findByConsultantIdAndDeleteDateIsNull(consultant.getId());
-
-    assertThat(result, notNullValue());
-    assertThat(result, hasSize(1));
-    assertThat(
-        this.consultantRepository
-            .findByIdAndDeleteDateIsNull(consultant.getId())
-            .get()
-            .isTeamConsultant(),
-        is(true));
-  }
-
-  @Test
   void createNewConsultantAgency_Should_updateKeycloakRoles_When_ParamsAreValid() {
     var roleSetName = "consultant";
     var createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
@@ -176,7 +130,6 @@ class ConsultantAgencyRelationCreatorServiceIT {
     int consultingType = 0;
     var agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
-    agencyDTO.setTeamAgency(false);
     agencyDTO.setConsultingType(consultingType);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
@@ -251,7 +204,6 @@ class ConsultantAgencyRelationCreatorServiceIT {
     session.setUser(user);
     session.setAgencyId(agencyId);
     session.setLanguageCode(LanguageCode.de);
-    session.setTeamSession(true);
     session.setSessionTopics(Lists.newArrayList());
     session.setIsConsultantDirectlySet(false);
 

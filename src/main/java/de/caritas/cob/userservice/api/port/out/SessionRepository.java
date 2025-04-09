@@ -59,34 +59,6 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
       findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
           List<Long> agencyIds, SessionStatus sessionStatus, RegistrationType registrationType);
 
-  /**
-   * Find a {@link Session} by agency ids with status and team session where consultant is not the
-   * given consultant ordered by update date descending.
-   *
-   * @param agencyIds ids of agencies to search for
-   * @param sessionStatus {@link SessionStatus} to search for
-   * @param isTeamSession boolean to filter or not team sessions
-   * @return A list of {@link Session}s for the specific agency ids and status orderd by creation
-   *     date ascending
-   */
-  List<Session> findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-      List<Long> agencyIds,
-      Consultant consultant,
-      SessionStatus sessionStatus,
-      boolean isTeamSession);
-
-  /**
-   * Find team {@link Session} list by agency ids and status where consultant is not the given
-   * consultant ordered by creation date descending.
-   *
-   * @param agencyIds ids of agencies to search for
-   * @param sessionStatus {@link SessionStatus} to search for
-   * @return A list of {@link Session}s for the specific agency ids and status ordered by update
-   *     date descending
-   */
-  List<Session> findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionIsTrueOrderByUpdateDateDesc(
-      List<Long> agencyIds, Consultant consultant, SessionStatus sessionStatus);
-
   List<Session> findByUser(User user);
 
   List<Session> findByUserAndConsultingTypeId(User user, int consultingTypeId);
@@ -129,16 +101,6 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * @return A list of {@link Session}s for the specified agency ID
    */
   List<Session> findByAgencyIdAndStatusAndConsultantIsNull(
-      Long agencyId, SessionStatus sessionStatus);
-
-  /**
-   * Find all {@link Session}s by a agency ID and SessionStatus.
-   *
-   * @param agencyId the id to search for
-   * @param sessionStatus {@link SessionStatus}
-   * @return A list of {@link Session}s for the specified agency ID
-   */
-  List<Session> findByAgencyIdAndStatusAndTeamSessionIsTrue(
       Long agencyId, SessionStatus sessionStatus);
 
   /**

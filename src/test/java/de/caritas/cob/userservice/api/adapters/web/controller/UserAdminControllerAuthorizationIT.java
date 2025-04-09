@@ -475,7 +475,6 @@ class UserAdminControllerAuthorizationIT {
   @Test
   @WithMockUser(
       authorities = {
-        AuthorityValue.ANONYMOUS_DEFAULT,
         AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
         AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
         AuthorityValue.CONSULTANT_DEFAULT,
@@ -551,20 +550,6 @@ class UserAdminControllerAuthorizationIT {
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  void changeAgencyType_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
-      throws Exception {
-    mvc.perform(
-            post(AGENCY_CHANGE_TYPE_PATH)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(this.consultantAdminFacade, times(1)).changeAgencyType(any(), any());
   }
 
   @Test

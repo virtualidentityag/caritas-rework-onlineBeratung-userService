@@ -91,16 +91,6 @@ public class ImportRecordCreationInputAdapter implements ConsultantCreationInput
   }
 
   /**
-   * Provides the team consultant flag.
-   *
-   * @return the team consultant flag
-   */
-  @Override
-  public boolean isTeamConsultant() {
-    return this.importRecord.isTeamConsultant();
-  }
-
-  /**
    * Provdes the language formal flag.
    *
    * @return the language formal flag

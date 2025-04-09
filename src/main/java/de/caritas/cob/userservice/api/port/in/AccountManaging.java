@@ -25,6 +25,4 @@ public interface AccountManaging {
       int pageSize,
       String fieldName,
       boolean isAscending);
-
-  boolean isTeamAdvisedBy(Long sessionId, String consultantId);
 }

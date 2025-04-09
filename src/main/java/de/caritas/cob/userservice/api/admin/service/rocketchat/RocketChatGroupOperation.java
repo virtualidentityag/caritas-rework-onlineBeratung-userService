@@ -42,7 +42,7 @@ abstract class RocketChatGroupOperation {
     if (SessionStatus.NEW.equals(session.getStatus())) {
       return "enquiry";
     }
-    return session.isTeamSession() ? "team-session" : "standard-session";
+    return "standard-session";
   }
 
   void removeConsultantsFromSessionGroups(Session session, List<Consultant> consultants) {

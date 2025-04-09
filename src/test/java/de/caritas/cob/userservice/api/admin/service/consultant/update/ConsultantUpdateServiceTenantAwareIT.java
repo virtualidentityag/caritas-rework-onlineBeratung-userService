@@ -35,7 +35,7 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
   @Autowired ConsultantRepository consultantRepository;
 
   @Autowired ConsultantAgencyRepository consultantAgencyRepository;
-  private Set<String> consultantsToRemove = Sets.newHashSet();
+  private final Set<String> consultantsToRemove = Sets.newHashSet();
 
   @BeforeEach
   public void beforeTests() {
@@ -44,7 +44,7 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
 
   @AfterEach
   public void afterTests() {
-    consultantsToRemove.stream().forEach(id -> consultantRepository.deleteById(id));
+    consultantsToRemove.forEach(id -> consultantRepository.deleteById(id));
     TenantContext.clear();
   }
 
@@ -70,16 +70,12 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
     return VALID_CONSULTANT_ID;
   }
 
-  private Consultant givenAValidConsultantPersisted(String id, boolean isTeamConsultant) {
-    Consultant consultant = givenAValidConsultant(id, isTeamConsultant);
+  private Consultant givenAValidConsultantPersisted(String id) {
+    Consultant consultant = givenAValidConsultant(id);
     consultant.setLanguages(Set.of(new Language(consultant, LanguageCode.getByCode("de"))));
     consultant = consultantRepository.save(consultant);
     assignConsultantToAgency(consultant);
     return consultant;
-  }
-
-  private Consultant givenAValidConsultantPersisted(String id) {
-    return givenAValidConsultantPersisted(id, false);
   }
 
   private void assignConsultantToAgency(Consultant consultant) {
@@ -91,7 +87,7 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
     consultantAgencyRepository.save(consultantAgency);
   }
 
-  private Consultant givenAValidConsultant(String id, boolean isTeamConsultant) {
+  private Consultant givenAValidConsultant(String id) {
     Consultant consultant = new Consultant();
     consultant.setAppointments(null);
     consultant.setTenantId(1L);
@@ -105,7 +101,6 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
     consultant.setNotifyEnquiriesRepeating(true);
     consultant.setNotifyNewChatMessageFromAdviceSeeker(true);
     consultant.setWalkThroughEnabled(true);
-    consultant.setTeamConsultant(isTeamConsultant);
     consultant.setConsultantMobileTokens(Sets.newHashSet());
     consultant.setLanguageCode(LanguageCode.de);
 

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -90,7 +90,7 @@ public class AdminAgencyRelationService {
       de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO
           agency) {
     var result = new AgencyAdminResponseDTO();
-    BeanUtils.copyProperties(result, agency);
+    BeanUtils.copyProperties(agency, result);
 
     return result;
   }

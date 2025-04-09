@@ -1,8 +1,6 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
 import static de.caritas.cob.userservice.api.adapters.web.dto.MessageType.FURTHER_STEPS;
-import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toDate;
-import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -157,11 +155,7 @@ public class AvailableLastMessageUpdater {
     }
 
     session.setMessageDate(Helper.UNIXTIME_0.getTime());
-    if (ANONYMOUS.name().equals(session.getRegistrationType())) {
-      latestMessageDate.accept(toDate(session.getCreateDate()));
-    } else {
-      latestMessageDate.accept(Helper.UNIXTIME_0);
-    }
+    latestMessageDate.accept(Helper.UNIXTIME_0);
   }
 
   private void setAttachmentAndVideoCallMessage(
