@@ -297,15 +297,6 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void changeAgencyType_Should_returnOk_When_parametersAreValid() throws Exception {
-    this.mvc
-        .perform(post(AGENCY_CHANGE_TYPE_PATH).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(this.consultantAdminFacade, times(1)).changeAgencyType(any(), any());
-  }
-
-  @Test
   void deleteConsultantAgency_Should_returnOk_When_requiredParamsAreGiven() throws Exception {
     String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
     Long agencyId = 1L;

@@ -42,15 +42,6 @@ class AuthorityTest {
   }
 
   @Test
-  void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_ForKeycloakRoleAnonymous() {
-    List<String> result = Authority.getAuthoritiesByUserRole(UserRole.ANONYMOUS);
-
-    assertNotNull(result);
-    assertTrue(result.contains(AuthorityValue.ANONYMOUS_DEFAULT));
-    assertEquals(1, result.size());
-  }
-
-  @Test
   void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_ForKeycloakRoleTechnical() {
 
     List<String> result = Authority.getAuthoritiesByUserRole(UserRole.TECHNICAL);
@@ -84,14 +75,5 @@ class AuthorityTest {
     assertTrue(result.contains(AuthorityValue.CONSULTANT_CREATE));
     assertTrue(result.contains(AuthorityValue.CONSULTANT_UPDATE));
     assertEquals(3, result.size());
-  }
-
-  @Test
-  void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_When_KeycloakRoleIsAnonymous() {
-    List<String> result = Authority.getAuthoritiesByUserRole(UserRole.ANONYMOUS);
-
-    assertNotNull(result);
-    assertTrue(result.contains(AuthorityValue.ANONYMOUS_DEFAULT));
-    assertEquals(1, result.size());
   }
 }

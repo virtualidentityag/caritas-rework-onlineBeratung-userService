@@ -1,11 +1,9 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static java.util.Objects.nonNull;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -20,7 +18,6 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import java.util.function.BiFunction;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,16 +31,6 @@ public class CreateChatFacade {
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull AgencyService agencyService;
   private final @NonNull ChatConverter chatConverter;
-  /**
-   * Creates a chat in MariaDB, it's relation to the agency and Rocket.Chat-room.
-   *
-   * @param chatDTO {@link ChatDTO}
-   * @param consultant {@link Consultant}
-   * @return the generated chat link URL (String)
-   */
-  public CreateChatResponseDTO createChatV1(ChatDTO chatDTO, Consultant consultant) {
-    return createChat(chatDTO, consultant, this::saveChatV1);
-  }
 
   /**
    * Creates a chat in MariaDB and Rocket.Chat-room and do not save any chat_agency relation.
@@ -53,16 +40,11 @@ public class CreateChatFacade {
    * @return the generated chat link URL (String)
    */
   public CreateChatResponseDTO createChatV2(ChatDTO chatDTO, Consultant consultant) {
-    return createChat(chatDTO, consultant, this::saveChatV2);
-  }
-
-  private CreateChatResponseDTO createChat(
-      ChatDTO chatDTO, Consultant consultant, BiFunction<Consultant, ChatDTO, Chat> saveChat) {
     Chat chat = null;
     String rcGroupId = null;
 
     try {
-      chat = saveChat.apply(consultant, chatDTO);
+      chat = saveChatV2(consultant, chatDTO);
       rcGroupId = createRocketChatGroupWithTechnicalUser(chatDTO, chat);
       chat.setGroupId(rcGroupId);
       chatService.saveChat(chat);
@@ -74,19 +56,6 @@ public class CreateChatFacade {
       doRollback(chat, rcGroupId);
       throw e;
     }
-  }
-
-  private Chat saveChatV1(Consultant consultant, ChatDTO chatDTO) {
-    if (isEmpty(consultant.getConsultantAgencies())) {
-      throw new InternalServerErrorException(
-          String.format("Consultant with id %s is not assigned to any agency", consultant.getId()));
-    }
-    Long agencyId = consultant.getConsultantAgencies().iterator().next().getAgencyId();
-    AgencyDTO agency = this.agencyService.getAgency(agencyId);
-
-    Chat chat = chatService.saveChat(chatConverter.convertToEntity(chatDTO, consultant, agency));
-    createChatAgencyRelation(chat, agencyId);
-    return chat;
   }
 
   private Chat saveChatV2(Consultant consultant, ChatDTO chatDTO) {

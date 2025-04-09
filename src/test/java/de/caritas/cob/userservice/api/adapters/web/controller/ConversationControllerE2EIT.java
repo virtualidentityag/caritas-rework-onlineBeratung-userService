@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static java.util.Objects.nonNull;
@@ -26,28 +25,17 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.Subs
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.model.Session.RegistrationType;
-import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
-import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.Cookie;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.util.Lists;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
@@ -59,15 +47,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriTemplateHandler;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -125,7 +110,7 @@ class ConversationControllerE2EIT {
   private User user;
 
   @AfterEach
-  public void deleteAndRestore() {
+  void deleteAndRestore() {
     consultant = null;
     user = null;
     if (nonNull(session)) {
@@ -198,78 +183,6 @@ class ConversationControllerE2EIT {
         .andExpect(jsonPath("sessions[0].session.topic.name", is(FIRST_TOPIC_NAME)))
         .andExpect(jsonPath("sessions[0].session.topic.description", is(FIRST_TOPIC_DESC)))
         .andExpect(jsonPath("sessions[0].session.topic.status", is(FIRST_TOPIC_STATUS)));
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
-  void getAnonymousEnquiryDetailsShouldRespondWithNotFoundIfSessionDoesNotExist() throws Exception {
-    var sessionId = givenAnUnknownSessionId();
-
-    mockMvc
-        .perform(
-            get("/conversations/anonymous/{sessionId}", sessionId)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
-        .andExpect(status().isNotFound());
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
-  void getAnonymousEnquiryDetailsShouldRespondWithForbiddenIfAuthenticatedUserNotFromSession()
-      throws Exception {
-    givenAnAnonymousAuthenticatedUser();
-    givenAConsultantWithMultipleAgencies();
-    givenANewAnonymousSession();
-
-    mockMvc
-        .perform(
-            get("/conversations/anonymous/1")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
-        .andExpect(status().isForbidden());
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
-  void getAnonymousEnquiryDetailsShouldRespondIfNoneAvailable() throws Exception {
-    givenAnAnonymousAuthenticatedUser();
-    givenAConsultantWithMultipleAgencies();
-    givenANewAnonymousSession();
-    givenAValidRocketChatSystemUser();
-    givenRocketChatUsersPresenceGet();
-
-    mockMvc
-        .perform(
-            get("/conversations/anonymous/{sessionId}", session.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("numAvailableConsultants", is(0)))
-        .andExpect(jsonPath("status", is("NEW")));
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
-  void getAnonymousEnquiryDetailsShouldRespondIfConsultantsAvailable() throws Exception {
-    givenAnAnonymousAuthenticatedUser();
-    givenAConsultantWithMultipleAgencies();
-    givenANewAnonymousSession();
-    givenAValidRocketChatSystemUser();
-    givenRocketChatUsersPresenceGet(consultant.getRocketChatId());
-    givenConsultingTypeServiceResponse(session.getConsultingTypeId());
-
-    mockMvc
-        .perform(
-            get("/conversations/anonymous/{sessionId}", session.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("numAvailableConsultants", is(1)))
-        .andExpect(jsonPath("status", is("NEW")));
   }
 
   private void givenAValidTopicServiceResponse() {
@@ -358,76 +271,5 @@ class ConversationControllerE2EIT {
     initialLanguageCode = session.getLanguageCode();
     session.setLanguageCode(easyRandom.nextObject(LanguageCode.class));
     sessionRepository.save(session);
-  }
-
-  private void givenAnAnonymousAuthenticatedUser() {
-    user = userRepository.findById("9c4057d0-05ad-4e86-a47c-dc5bdeec03b9").orElseThrow();
-    when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
-    when(authenticatedUser.getRoles()).thenReturn(Set.of("anonymous"));
-  }
-
-  private void givenANewAnonymousSession() {
-    session = new Session();
-    session.setUser(user);
-    session.setConsultingTypeId(1);
-    session.setRegistrationType(RegistrationType.ANONYMOUS);
-    session.setLanguageCode(LanguageCode.de);
-    session.setPostcode(RandomStringUtils.randomNumeric(5));
-    session.setAgencyId(consultant.getConsultantAgencies().iterator().next().getAgencyId());
-    session.setStatus(SessionStatus.NEW);
-    session.setTeamSession(false);
-    session.setCreateDate(LocalDateTime.now());
-    session.setGroupId(RandomStringUtils.randomAlphabetic(17));
-    session.setIsConsultantDirectlySet(false);
-
-    sessionRepository.save(session);
-    deleteSession = true;
-  }
-
-  private Long givenAnUnknownSessionId() {
-    Long sessionId;
-    do {
-      sessionId = (long) easyRandom.nextInt(1000);
-    } while (sessionRepository.existsById(sessionId));
-
-    return sessionId;
-  }
-
-  private void givenAValidRocketChatSystemUser() throws RocketChatUserNotInitializedException {
-    when(rocketChatCredentialsProvider.getSystemUserSneaky()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
-    when(rocketChatCredentialsProvider.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
-  }
-
-  private void givenConsultingTypeServiceResponse(Integer consultingTypeId) {
-    consultingTypeControllerApi.getApiClient().setBasePath("https://www.google.de/");
-    when(restTemplate.getUriTemplateHandler())
-        .thenReturn(
-            new UriTemplateHandler() {
-              @SneakyThrows
-              @Override
-              public @NonNull URI expand(
-                  @NonNull String uriTemplate, @NonNull Map<String, ?> uriVariables) {
-                return new URI("");
-              }
-
-              @SneakyThrows
-              @Override
-              public @NonNull URI expand(
-                  @NonNull String uriTemplate, Object @NonNull ... uriVariables) {
-                return new URI("");
-              }
-            });
-
-    var agencyId = consultant.getConsultantAgencies().iterator().next().getAgencyId();
-
-    var body = new de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO();
-    body.setConsultingType(consultingTypeId);
-    body.setId(agencyId);
-    ParameterizedTypeReference<
-            java.util.List<
-                de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO>>
-        value = new ParameterizedTypeReference<>() {};
-    when(restTemplate.exchange(any(RequestEntity.class), eq(value)))
-        .thenReturn(ResponseEntity.ok(List.of(body)));
   }
 }

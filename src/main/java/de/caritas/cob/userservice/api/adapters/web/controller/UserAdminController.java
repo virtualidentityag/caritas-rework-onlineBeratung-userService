@@ -5,7 +5,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AskerResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyResponseDTO;
@@ -250,18 +249,6 @@ public class UserAdminController implements UseradminApi {
       @PathVariable String consultantId) {
     var consultantAgencies = this.consultantAdminFacade.findConsultantAgencies(consultantId);
     return ResponseEntity.ok(consultantAgencies);
-  }
-
-  /**
-   * Entry point to handle consultant data when agency type changes.
-   *
-   * @param agencyId the id of the changed agency
-   * @param agencyTypeDTO contains the target type
-   */
-  @Override
-  public ResponseEntity<Void> changeAgencyType(Long agencyId, @Valid AgencyTypeDTO agencyTypeDTO) {
-    this.consultantAdminFacade.changeAgencyType(agencyId, agencyTypeDTO);
-    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**

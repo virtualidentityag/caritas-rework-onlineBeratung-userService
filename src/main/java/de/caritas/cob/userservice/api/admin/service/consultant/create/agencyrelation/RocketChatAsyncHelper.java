@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrel
 
 import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier.TEMPLATE_FREE_TEXT;
 import static java.util.Arrays.asList;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatAddToGroupOperationService;
@@ -107,14 +106,7 @@ public class RocketChatAsyncHelper {
   }
 
   private List<Session> collectRelevantSessionsToAddConsultant(AgencyDTO agency) {
-    List<Session> sessionsToAddConsultant =
-        sessionRepository.findByAgencyIdAndStatusAndConsultantIsNull(
-            agency.getId(), SessionStatus.NEW);
-    if (isTrue(agency.getTeamAgency())) {
-      sessionsToAddConsultant.addAll(
-          sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(
-              agency.getId(), SessionStatus.IN_PROGRESS));
-    }
-    return sessionsToAddConsultant;
+    return sessionRepository.findByAgencyIdAndStatusAndConsultantIsNull(
+        agency.getId(), SessionStatus.NEW);
   }
 }

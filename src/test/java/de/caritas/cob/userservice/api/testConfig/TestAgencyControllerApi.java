@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.testConfig;
 import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
-import de.caritas.cob.userservice.agencyserivce.generated.web.model.FullAgencyResponseDTO;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -16,13 +15,6 @@ public class TestAgencyControllerApi extends AgencyControllerApi {
 
   public TestAgencyControllerApi(ApiClient apiClient) {
     super(apiClient);
-  }
-
-  @Override
-  public List<FullAgencyResponseDTO> getAgencies(
-      String postcode, Integer consultingType, Integer topicId, Integer age, String gender)
-      throws RestClientException {
-    return List.of(new FullAgencyResponseDTO());
   }
 
   @Override

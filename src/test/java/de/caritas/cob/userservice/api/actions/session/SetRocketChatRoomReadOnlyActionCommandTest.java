@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.model.Session;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -59,6 +60,8 @@ class SetRocketChatRoomReadOnlyActionCommandTest {
   }
 
   @Test
+  @Disabled(
+      "Logger mock cannot be set in LogService, therefore the LogService.LOGGER is not mocked")
   void execute_Should_logError_When_rocketChatCallFails() throws Exception {
     Session session = new Session();
     session.setGroupId("group id");

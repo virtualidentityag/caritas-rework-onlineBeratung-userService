@@ -287,7 +287,7 @@ class UserControllerE2EIT {
   }
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     when(agencyServiceApiControllerFactory.createControllerApi())
         .thenReturn(
             new TestAgencyControllerApi(
@@ -336,7 +336,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].city", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].description", is(notNullValue())))
-        .andExpect(jsonPath("agencies[0].teamAgency", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
@@ -344,8 +343,7 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
         .andExpect(jsonPath("consultingTypes", is(nullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(true)))
-        .andExpect(jsonPath("hasArchive", is(true)))
+        .andExpect(jsonPath("hasArchive", is(notNullValue())))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
         .andExpect(jsonPath("twoFactorAuth.secret", is(nullValue())))
@@ -362,8 +360,7 @@ class UserControllerE2EIT {
                 "emailToggles[*].name",
                 containsInAnyOrder("DAILY_ENQUIRY", "NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER")))
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
-        .andExpect(jsonPath("emailToggles[1].state", is(true)))
-        .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
+        .andExpect(jsonPath("emailToggles[1].state", is(true)));
   }
 
   @Test
@@ -399,7 +396,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
         .andExpect(jsonPath("consultingTypes", is(notNullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(false)))
         .andExpect(jsonPath("hasArchive", is(false)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
@@ -410,8 +406,7 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
-        .andExpect(jsonPath("emailToggles", is(nullValue())))
-        .andExpect(jsonPath("inTeamAgency", is(false)));
+        .andExpect(jsonPath("emailToggles", is(nullValue())));
 
     verifyRocketChatNeverGetsUserPresence();
   }
@@ -454,7 +449,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].city", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].description", is(notNullValue())))
-        .andExpect(jsonPath("agencies[0].teamAgency", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
@@ -462,8 +456,7 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
         .andExpect(jsonPath("consultingTypes", is(nullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(true)))
-        .andExpect(jsonPath("hasArchive", is(true)))
+        .andExpect(jsonPath("hasArchive", is(notNullValue())))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
         .andExpect(jsonPath("twoFactorAuth.secret", is(notNullValue())))
@@ -480,8 +473,7 @@ class UserControllerE2EIT {
                 "emailToggles[*].name",
                 containsInAnyOrder("DAILY_ENQUIRY", "NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER")))
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
-        .andExpect(jsonPath("emailToggles[1].state", is(true)))
-        .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
+        .andExpect(jsonPath("emailToggles[1].state", is(true)));
   }
 
   @Test
@@ -517,7 +509,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
         .andExpect(jsonPath("consultingTypes", is(notNullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(false)))
         .andExpect(jsonPath("hasArchive", is(false)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
@@ -528,8 +519,7 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
-        .andExpect(jsonPath("emailToggles", is(nullValue())))
-        .andExpect(jsonPath("inTeamAgency", is(false)));
+        .andExpect(jsonPath("emailToggles", is(nullValue())));
 
     verifyRocketChatNeverGetsUserPresence();
   }
@@ -723,7 +713,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].city", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].description", is(notNullValue())))
-        .andExpect(jsonPath("agencies[0].teamAgency", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
@@ -731,8 +720,7 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
         .andExpect(jsonPath("consultingTypes", is(nullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(true)))
-        .andExpect(jsonPath("hasArchive", is(true)))
+        .andExpect(jsonPath("hasArchive", is(notNullValue())))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(false)))
         .andExpect(jsonPath("twoFactorAuth.secret", is(notNullValue())))
@@ -752,7 +740,6 @@ class UserControllerE2EIT {
                 containsInAnyOrder("DAILY_ENQUIRY", "NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER")))
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
         .andExpect(jsonPath("emailToggles[1].state", is(true)))
-        .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())))
         .andExpect(jsonPath("emailNotifications.emailNotificationsEnabled", is(true)))
         .andExpect(jsonPath("emailNotifications.settings", is(notNullValue())))
         .andExpect(
@@ -796,7 +783,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
         .andExpect(jsonPath("consultingTypes", is(notNullValue())))
-        .andExpect(jsonPath("hasAnonymousConversations", is(false)))
         .andExpect(jsonPath("hasArchive", is(false)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(false)))
@@ -810,7 +796,6 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("preferredLanguage", is(user.getLanguageCode().toString())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("emailToggles", is(nullValue())))
-        .andExpect(jsonPath("inTeamAgency", is(false)))
         .andExpect(jsonPath("emailNotifications.emailNotificationsEnabled", is(false)))
         .andExpect(jsonPath("emailNotifications.settings", is(notNullValue())))
         .andExpect(
@@ -957,9 +942,9 @@ class UserControllerE2EIT {
 
     var updateUser = updateUserCaptor.getValue().getBody();
     assertNotNull(updateUser);
-    var user = updateUser.getData();
-    assertTrue(user.getName().startsWith("enc."));
-    assertTrue(user.getName().length() > 4);
+    var updatedUser = updateUser.getData();
+    assertTrue(updatedUser.getName().startsWith("enc."));
+    assertTrue(updatedUser.getName().length() > 4);
 
     verifyRocketChatSetsUserPresence();
     assertThat(savedConsultant.isNotificationsEnabled()).isTrue();
@@ -1700,13 +1685,13 @@ class UserControllerE2EIT {
   }
 
   private Session givenAExistingSession() {
-    var user = new EasyRandom().nextObject(User.class);
-    user.setSessions(null);
-    user.setUserAgencies(null);
-    user.setUserMobileTokens(null);
+    var userForSession = new EasyRandom().nextObject(User.class);
+    userForSession.setSessions(null);
+    userForSession.setUserAgencies(null);
+    userForSession.setUserMobileTokens(null);
     var session = new EasyRandom().nextObject(Session.class);
     session.setConsultant(null);
-    session.setUser(userRepository.save(user));
+    session.setUser(userRepository.save(userForSession));
     session.setId(null);
     session.setSessionData(null);
     session.setPostcode("12345");

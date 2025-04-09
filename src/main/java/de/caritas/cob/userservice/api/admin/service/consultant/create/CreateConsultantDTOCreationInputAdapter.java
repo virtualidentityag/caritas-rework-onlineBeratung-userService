@@ -97,16 +97,6 @@ public class CreateConsultantDTOCreationInputAdapter implements ConsultantCreati
   }
 
   /**
-   * Provides the team consultant flag.
-   *
-   * @return the team consultant flag
-   */
-  @Override
-  public boolean isTeamConsultant() {
-    return false;
-  }
-
-  /**
    * Provides the language formal flag.
    *
    * @return the language formal flag

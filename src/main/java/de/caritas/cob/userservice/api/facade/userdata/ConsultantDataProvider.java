@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import com.neovisionaries.i18n.LanguageCode;
@@ -19,7 +18,6 @@ import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -72,14 +70,11 @@ public class ConsultantDataProvider {
         .preferredLanguage(preferredLanguageOf(consultant.getLanguageCode()))
         .encourage2fa(consultant.getEncourage2fa())
         .absenceMessage(consultant.getAbsenceMessage())
-        .isInTeamAgency(consultant.isTeamConsultant())
         .agencies(agencyDTOsOf(consultant))
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
         .isWalkThroughEnabled(consultant.getWalkThroughEnabled())
         .emailToggles(emailTogglesOf(consultant))
-        .hasAnonymousConversations(
-            hasAtLeastOneTypeWithAllowedAnonymousConversations(agencyDTOsOf(consultant)))
         .hasArchive(hasArchive(consultant))
         .dataPrivacyConfirmation(consultant.getDataPrivacyConfirmation())
         .termsAndConditionsConfirmation(consultant.getTermsAndConditionsConfirmation())
@@ -116,22 +111,8 @@ public class ConsultantDataProvider {
         languageCode.toString());
   }
 
-  private boolean hasAtLeastOneTypeWithAllowedAnonymousConversations(List<AgencyDTO> agencyDTOS) {
-    return agencyDTOS.stream()
-        .map(AgencyDTO::getConsultingType)
-        .map(this.consultingTypeManager::getConsultingTypeSettings)
-        .anyMatch(this::hasAnonymousConversationAllowed);
-  }
-
-  private boolean hasAnonymousConversationAllowed(
-      ExtendedConsultingTypeResponseDTO consultingTypeResponseDTO) {
-    return nonNull(consultingTypeResponseDTO)
-        && isTrue(consultingTypeResponseDTO.getIsAnonymousConversationAllowed());
-  }
-
   private boolean hasArchive(Consultant consultant) {
-    return hasAtLeastOneRegisteredSessionInProgressOrArchive(consultant)
-        || consultant.isTeamConsultant();
+    return hasAtLeastOneRegisteredSessionInProgressOrArchive(consultant);
   }
 
   private boolean hasAtLeastOneRegisteredSessionInProgressOrArchive(Consultant consultant) {

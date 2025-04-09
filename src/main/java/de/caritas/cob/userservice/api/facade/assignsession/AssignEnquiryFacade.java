@@ -1,13 +1,10 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
-import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
-import static java.util.Objects.nonNull;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveFromGroupOperationService;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -82,32 +79,6 @@ public class AssignEnquiryFacade {
             });
   }
 
-  /**
-   * Assigns the given {@link Session} session to the given {@link Consultant}. Add the given {@link
-   * Consultant} to the Rocket.Chat group.
-   *
-   * @param session the session to assign the consultant
-   * @param consultant the consultant to assign
-   */
-  public void assignAnonymousEnquiry(Session session, Consultant consultant) {
-    assignEnquiry(session, consultant);
-    try {
-      this.rocketChatFacade.addUserToRocketChatGroup(
-          consultant.getRocketChatId(), session.getGroupId());
-      this.rocketChatFacade.removeSystemMessagesFromRocketChatGroup(session.getGroupId());
-    } catch (Exception e) {
-      rollbackSessionUpdate(session);
-      throw new InternalServerErrorException(
-          String.format(
-              "Could not add consultant %s to group %s",
-              consultant.getRocketChatId(), session.getGroupId()));
-    }
-  }
-
-  private void assignEnquiry(Session session, Consultant consultant) {
-    assignEnquiry(session, consultant, false);
-  }
-
   private void assignEnquiry(
       Session session,
       Consultant consultant,
@@ -157,12 +128,6 @@ public class AssignEnquiryFacade {
 
     if (rcGroupId.equalsIgnoreCase(session.getGroupId())) {
       rocketChatRemoveFromGroupOperationService.removeFromGroupAndIgnoreGroupNotFound();
-    }
-  }
-
-  private void rollbackSessionUpdate(Session session) {
-    if (nonNull(session)) {
-      sessionService.updateConsultantAndStatusForSession(session, null, NEW);
     }
   }
 }

@@ -4,7 +4,6 @@ public enum DeletionTargetType {
   KEYCLOAK,
   ROCKET_CHAT,
   DATABASE,
-  ANONYMOUS_REGISTRY_IDS,
   APPOINTMENT_SERVICE,
   ALL;
 }

@@ -128,15 +128,6 @@ public class AccountManager implements AccountManaging {
   }
 
   @Override
-  public boolean isTeamAdvisedBy(Long sessionId, String consultantId) {
-    var session = sessionRepository.findById(sessionId).orElseThrow();
-
-    return session.isTeamSession()
-        && consultantAgencyRepository.existsByConsultantIdAndAgencyIdAndDeleteDateIsNull(
-            consultantId, session.getAgencyId());
-  }
-
-  @Override
   public Optional<Map<String, Object>> patchUser(Map<String, Object> patchMap) {
     var id = (String) patchMap.get("id");
     var userMap = new HashMap<String, Object>();
