@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v3.1.1...v3.1.2) (2025-04-10)
+
+
+### Bug Fixes
+
+* actions cache version ([65546e4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/65546e49a38ec0be5f6465ffa0259e8fa9717b59))
+* actions cache version ([43f5e71](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/43f5e717a20c956c8befed597474296bd6fa2ae2))
+* CARITAS-372 ([d7e4149](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d7e414902cb94833f19fed993f454248476ed8d5))
+* remove feedbackGroupId from Session ([3586ce6](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3586ce615f6a925cac2bf99f3a6e9bf22f0e8034))
+
 ### [3.1.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v3.1.0...v3.1.1) (2025-01-03)
 
 
