@@ -124,10 +124,8 @@ public class ChatPermissionVerifier {
   }
 
   /**
-   * Check if the authenticated user has user permission on given chat.
-   *
-   * <p>This method combines a check for V1 (same agency assigned as chat) and V2 (user has a valid
-   * chat assignment).
+   * Check if the authenticated user has user permission on given chat, which means the user has a
+   * valid chat assignment.
    *
    * @param chat the {@link Chat}
    */
@@ -140,7 +138,7 @@ public class ChatPermissionVerifier {
                     new NotFoundException(
                         "User with id %s not found", authenticatedUser.getUserId()));
 
-    if (!hasChatUserAssignment(chat, user) && !hasSameAgencyAssigned(chat, user)) {
+    if (!hasChatUserAssignment(chat, user)) {
       throw new ForbiddenException(
           String.format(
               "User with id %s has no permission for chat with id %s",

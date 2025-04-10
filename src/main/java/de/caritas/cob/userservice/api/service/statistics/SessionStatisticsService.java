@@ -60,7 +60,6 @@ public class SessionStatisticsService {
         .rcGroupId(session.getGroupId())
         .agencyId(session.getAgencyId())
         .consultingType(session.getConsultingTypeId())
-        .isTeamSession(session.isTeamSession())
         .createDate(String.valueOf(session.getCreateDate()))
         .messageDate(String.valueOf(session.getEnquiryMessageDate()))
         .postcode(session.getPostcode());

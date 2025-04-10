@@ -62,9 +62,4 @@ public class AuthenticatedUser {
   public boolean isTenantSuperAdmin() {
     return nonNull(roles) && roles.contains(UserRole.TENANT_ADMIN.getValue());
   }
-
-  @JsonIgnore
-  public boolean isAnonymous() {
-    return nonNull(roles) && roles.contains(UserRole.ANONYMOUS.getValue());
-  }
 }

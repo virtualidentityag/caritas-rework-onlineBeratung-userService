@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUserDTO;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
@@ -25,7 +24,6 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -43,7 +41,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
@@ -378,8 +375,7 @@ public class AskerImportService {
         }
 
         // Initialize Session (need session id for Rocket.Chat group name)
-        Session session =
-            sessionService.initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()));
+        Session session = sessionService.initializeSession(dbUser, userDTO);
         if (session.getId() == null) {
           throw new ImportException(
               String.format("Could not create session for user %s", record.getUsername()));
@@ -430,9 +426,6 @@ public class AskerImportService {
                   "Could not update Rocket.Chat user id for user %s", record.getUsername()));
         }
 
-        List<ConsultantAgency> agencyList =
-            consultantAgencyService.findConsultantsByAgencyId(record.getAgencyId());
-
         // Update session data by Rocket.Chat group id and consultant id
         session.setConsultant(consultant.get());
         session.setGroupId(rcGroupId);
@@ -446,23 +439,8 @@ public class AskerImportService {
               String.format("Could update session for user %s", record.getUsername()));
         }
 
-        // Add consultant(s) to Rocket.Chat group
-        if (isTrue(agencyDTO.getTeamAgency())) {
-          if (agencyList != null) {
-            for (ConsultantAgency agency : agencyList) {
-              if (agency.getConsultant().getId().equals(record.getConsultantId())) {
-                rocketChatService.addUserToGroup(
-                    agency.getConsultant().getRocketChatId(), rcGroupId);
-              } else {
-                rocketChatService.addUserToGroup(
-                    agency.getConsultant().getRocketChatId(), rcGroupId);
-              }
-            }
-          }
-
-        } else {
-          rocketChatService.addUserToGroup(consultant.get().getRocketChatId(), rcGroupId);
-        }
+        // Add consultant to Rocket.Chat group
+        rocketChatService.addUserToGroup(consultant.get().getRocketChatId(), rcGroupId);
 
         // Add system message user to Rocket.Chat group
         rocketChatService.addUserToGroup(systemUserId, rcGroupId);

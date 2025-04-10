@@ -137,7 +137,6 @@ public class AdminDtoMapper implements DtoMapperUtils {
           agency.setPostcode((String) agencyMap.get("postcode"));
           agency.setCity((String) agencyMap.get("city"));
           agency.setDescription((String) agencyMap.get("description"));
-          agency.setTeamAgency((Boolean) agencyMap.get("isTeamAgency"));
           agency.setOffline((Boolean) agencyMap.get("isOffline"));
           agency.setConsultingType((Integer) agencyMap.get("consultingType"));
           agencies.add(agency);

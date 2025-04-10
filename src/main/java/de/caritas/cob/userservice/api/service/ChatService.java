@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -119,15 +118,14 @@ public class ChatService {
   /**
    * Returns the list of current chats for the provided userId.
    *
-   * <p>The chats are collected from the user_agency relation (V1) and the user_chat relation (V2).
+   * <p>The chats are collected from the user_chat relation.
    *
    * @param userId the id of the user
    * @return list of user chats as {@link UserSessionResponseDTO}
    */
   public List<UserSessionResponseDTO> getChatsForUserId(String userId) {
-    List<Chat> chats = chatRepository.findByUserId(userId);
     List<Chat> assignedChats = chatRepository.findAssignedByUserId(userId);
-    return Stream.concat(chats.stream(), assignedChats.stream())
+    return assignedChats.stream()
         .map(this::convertChatToUserSessionResponseDTO)
         .collect(Collectors.toList());
   }

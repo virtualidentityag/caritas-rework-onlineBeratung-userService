@@ -4,19 +4,13 @@ https://plantuml.com/de/state-diagram
 hide empty description
 
 [*] --> NightlyCronJob
-[*] --> HourlyCronJob
 
 NightlyCronJob : user.account.deleteworkflow.cron
 NightlyCronJob --> DeleteUserAccountScheduler : triggers
 
-HourlyCronJob : user.anonymous.deleteworkflow.cron
-HourlyCronJob --> DeleteUserAnonymousScheduler : triggers
-
 note right of NightlyCronJob : Configured in application.properties
-note right of HourlyCronJob : Configured in application.properties
 
 DeleteUserAccountScheduler --> DeleteUserAccountService : executes
-DeleteUserAnonymousScheduler --> DeleteUserAnonymousService : executes
 
 state DeleteUserAccountService #lightblue {
   [*] --> CollectDeletedUsers
@@ -29,8 +23,7 @@ state DeleteUserAccountService #lightblue {
     DeleteKeycloakAskerAction --> DeleteAskerRoomsAndSessionsAction
     DeleteAskerRoomsAndSessionsAction --> DeleteDatabaseAskerAgencyAction
     DeleteDatabaseAskerAgencyAction --> DeleteRocketChatAskerAction
-    DeleteRocketChatAskerAction --> DeleteAnonymousRegistryIdAction
-    DeleteAnonymousRegistryIdAction --> DeleteDatabaseAskerAction
+    DeleteRocketChatAskerAction --> DeleteDatabaseAskerAction
     DeleteDatabaseAskerAction --> WorkflowErrors : collect all errors
   }
 
@@ -45,11 +38,5 @@ state DeleteUserAccountService #lightblue {
 
 state WorkflowErrorMailService {
   BuildOneMailContainingAllErrors --> sendToMailService
-}
-
-state DeleteUserAnonymousService #lightblue {
-  [*] --> CollectInactiveAnonymousUsers
-  CollectInactiveAnonymousUsers --> DeleteAskerActions : executes
-  WorkflowErrors --> WorkflowErrorMailService
 }
 @enduml

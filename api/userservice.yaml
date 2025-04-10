@@ -97,6 +97,7 @@ paths:
         - user-controller
       summary: 'Register a new consulting type for an existing asker [Authorization: Role: user]'
       operationId: registerNewConsultingType
+      deprecated: true
       parameters:
         - name: RCToken
           in: header
@@ -262,7 +263,7 @@ paths:
         - user-controller
       summary: 'Returns a list of open session(s) for the currently authenticated
         user. Note: Either a session or a chat object is provided. [Authorization:
-        Role: user, anonymous]'
+        Role: user]'
       operationId: getSessionsForAuthenticatedUser
       parameters:
         - name: RCToken
@@ -531,7 +532,7 @@ paths:
       tags:
         - user-controller
       summary: 'Returns user (meta)data for the currently authenticated user [Authorization:
-        Role: user, anonymous, consultant]'
+        Role: user, consultant]'
       operationId: getUserData
       responses:
         200:
@@ -840,57 +841,6 @@ paths:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token (tech user)
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
-  /users/sessions/teams:
-    get:
-      tags:
-        - user-controller
-      summary: 'Returns a list of team consulting sessions, which were accepted by
-        other consultants of the team, for the currently authenticated consultant
-        [Authorization: Role: consultant]'
-      operationId: getTeamSessionsForAuthenticatedConsultant
-      parameters:
-        - name: RCToken
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: offset
-          in: query
-          description: Number of items where to start in the query (0 = first item)
-          required: true
-          schema:
-            minimum: 0
-            type: integer
-        - name: count
-          in: query
-          description: Number of items which are being returned
-          required: true
-          schema:
-            minimum: 1
-            type: integer
-        - name: filter
-          in: query
-          description: Information on how to filter the list
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: successful operation
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/ConsultantSessionListResponseDTO'
-        204:
-          description: successful operation, but no content
-        401:
-          description: UNAUTHORIZED - no/invalid Keycloak token
-        403:
-          description: FORBIDDEN - no/invalid role/authorization or CSRF token
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -1257,36 +1207,6 @@ paths:
           description: UNAUTHORIZED - no/invalid Keycloak token
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
-  /users/chat/new:
-    post:
-      tags:
-        - user-controller
-      summary: 'Create a new group chat with chat_agency relation so that all advice seekers from that agency can see this chat. [Authorization: Role: consultant with authority
-        CREATE_NEW_CHAT]'
-      operationId: createChatV1
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: '#/components/schemas/ChatDTO'
-        required: true
-      responses:
-        201:
-          description: CREATED - group chat was created successfully
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/CreateChatResponseDTO'
-        400:
-          description: BAD REQUEST - invalid/incomplete request or body object
-        403:
-          description: FORBIDDEN - no/invalid CSRF token
-        409:
-          description: CONFLICT - group chat with same name already existing
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -2092,12 +2012,10 @@ components:
         messagesRead:
           type: boolean
           example: false
-        isTeamSession:
-          type: boolean
-          example: false
+
         registrationType:
           type: string
-          example: ANONYMOUS
+          example: REGISTERED
         createDate:
           type: string
           example: 2021-05-11T15:29:37
@@ -2242,9 +2160,6 @@ components:
           type: string
           example: asker123
           description: asker username
-        isTeamSession:
-          type: boolean
-          example: false
         age:
           type: integer
           example: 17
@@ -2504,9 +2419,6 @@ components:
         absenceMessage:
           type: string
           example: Bin mal weg...
-        isInTeamAgency:
-          type: boolean
-          example: true
         agencies:
           type: array
           items:
@@ -2523,11 +2435,6 @@ components:
           $ref: "#/components/schemas/TwoFactorAuthDTO"
         consultingTypes:
           $ref: "#/components/schemas/ConsultingTypeMap"
-        hasAnonymousConversations:
-          type: boolean
-          example: true
-          description: "Is true if consultant has at least one consulting type containing
-          anonymous conversations active"
         hasArchive:
           type: boolean
           example: true
@@ -2686,9 +2593,6 @@ components:
         description:
           type: string
           example: Our agency provides help for the following topics..
-        teamAgency:
-          type: boolean
-          example: false
         offline:
           type: boolean
           example: false
@@ -2699,10 +2603,16 @@ components:
           type: integer
           format: int64
           example: 12
+        agencySpecificPrivacy:
+          type: string
+          example: "specific for agency privacy text"
         topicIds:
           type: array
           items:
             type: long
+        agencyLogo:
+          type: string
+          example: "base64 encoded image"
 
 
     MobileTokenDTO:

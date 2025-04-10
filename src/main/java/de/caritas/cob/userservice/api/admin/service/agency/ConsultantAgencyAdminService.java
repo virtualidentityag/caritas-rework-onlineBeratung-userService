@@ -2,22 +2,17 @@ package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_AGENCY_RELATION_DOES_NOT_EXIST;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
@@ -28,7 +23,7 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 /** Service class to handle administrative operations on consultant-agencies. */
@@ -39,7 +34,6 @@ public class ConsultantAgencyAdminService {
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull SessionRepository sessionRepository;
-  private final @NonNull RemoveConsultantFromRocketChatService removeFromRocketChatService;
   private final @NonNull AgencyService agencyService;
   private final @NonNull AgencyAdminService agencyAdminService;
   private final @NonNull ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
@@ -96,7 +90,7 @@ public class ConsultantAgencyAdminService {
       de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO
           agency) {
     var result = new AgencyAdminResponseDTO();
-    BeanUtils.copyProperties(result, agency);
+    BeanUtils.copyProperties(agency, result);
 
     return result;
   }
@@ -137,70 +131,6 @@ public class ConsultantAgencyAdminService {
 
   private boolean notStringNull(String stringToCheck) {
     return isNotBlank(stringToCheck) && !"null".equals(stringToCheck);
-  }
-
-  /**
-   * Marks all assigned consultants of team agency as team consultants.
-   *
-   * @param agencyId the id of the agency
-   */
-  public void markAllAssignedConsultantsAsTeamConsultant(Long agencyId) {
-    this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(agencyId).stream()
-        .map(ConsultantAgency::getConsultant)
-        .filter(this::notAlreadyTeamConsultant)
-        .forEach(this::markConsultantAsTeamConsultant);
-  }
-
-  private boolean notAlreadyTeamConsultant(Consultant consultant) {
-    return !consultant.isTeamConsultant();
-  }
-
-  private void markConsultantAsTeamConsultant(Consultant consultant) {
-    consultant.setTeamConsultant(true);
-    this.consultantRepository.save(consultant);
-  }
-
-  /**
-   * Removes the consultant from all Rocket.Chat rooms where he is not directly assigned, changes
-   * regarding sessions to non team sessions and removes the team consultant identifier when
-   * consultant has no other team agency assigned.
-   *
-   * @param agencyId the id of the agency
-   */
-  public void removeConsultantsFromTeamSessionsByAgencyId(Long agencyId) {
-    List<Session> teamSessionsInProgress =
-        this.sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(
-            agencyId, SessionStatus.IN_PROGRESS);
-
-    this.removeFromRocketChatService.removeConsultantFromSessions(teamSessionsInProgress);
-    teamSessionsInProgress.forEach(this::changeSessionToNonTeamSession);
-
-    this.consultantRepository
-        .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(agencyId))
-        .stream()
-        .filter(consultant -> noOtherTeamAgency(consultant, agencyId))
-        .forEach(this::removeTeamConsultantFlag);
-  }
-
-  private void changeSessionToNonTeamSession(Session session) {
-    session.setTeamSession(false);
-    this.sessionRepository.save(session);
-  }
-
-  private boolean noOtherTeamAgency(Consultant consultant, Long agencyId) {
-    return consultant.getConsultantAgencies().stream()
-        .map(this::toAgencyDto)
-        .filter(agencyDTO -> !agencyId.equals(agencyDTO.getId()))
-        .noneMatch(AgencyDTO::getTeamAgency);
-  }
-
-  private AgencyDTO toAgencyDto(ConsultantAgency consultantAgency) {
-    return this.agencyService.getAgency(consultantAgency.getAgencyId());
-  }
-
-  private void removeTeamConsultantFlag(Consultant consultant) {
-    consultant.setTeamConsultant(false);
-    this.consultantRepository.save(consultant);
   }
 
   /**

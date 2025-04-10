@@ -148,8 +148,6 @@ paths:
           description: NOT FOUND - agency not found
         409:
           description: CONFLICT - agency contains consultants and therefore can't be deleted
-        423:
-          description: LOCKED - agency is locked for deletion (e.g. Kreuzbund)
         401:
           description: UNAUTHORIZED - no/invalid role/authorization
         500:
@@ -192,71 +190,35 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /agencyadmin/dioceses:
+  /agencyadmin/agencies/tenant/{tenantId}:
     get:
       tags:
         - admin-agency-controller
-      summary: 'Returns the full list of dioceses [Authorization: Role: agency-admin]'
-      operationId: getDioceses
+      summary: 'Get an agency [Authorization: Roles: agency-admin and tenant-admin]'
+      operationId: getAgenciesByTenantId
       parameters:
-        - name: page
-          in: query
-          description: Number of page where to start in the query (1 = first page)
-          required: true
-          schema:
-            type: integer
-            example: 1
-        - name: perPage
-          in: query
-          description: Number of items which are being returned per page
-          required: true
-          schema:
-            type: integer
-            example: 20
-      responses:
-        200:
-          description: OK - successfull operation
-          content:
-            'application/hal+json':
-              schema:
-                $ref: '#/components/schemas/DioceseAdminResultDTO'
-        400:
-          description: BAD REQUEST - invalid/incomplete request or body object
-        401:
-          description: UNAUTHORIZED - no/invalid role/authorization
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
-  /agencyadmin/agencies/{agencyId}/changetype:
-    post:
-      tags:
-        - admin-agency-controller
-      summary: 'Change an agency from team-agency to default and vice-versa and switch the
-      associated consultant accounts to team consultant or default consultant. Ongoing team
-      counselings change to 1:1 when converting agency to default status. 1:1 counselings remain
-      single counselings when swapping the agency to team-agency. [Authorization: Role: user-admin]'
-      operationId: changeAgencyType
-      parameters:
-        - name: agencyId
+        - name: tenantId
           in: path
-          description: Agency Id
+          description: Tenant ID
           required: true
           schema:
             type: integer
             format: int64
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: '#/components/schemas/AgencyTypeRequestDTO'
       responses:
         200:
-          description: OK - agency type successfully changed
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgencyAdminFullResponseDTO'
         400:
-          description: BAD REQUEST - invalid/incomplete request or body object
+          description: BAD REQUEST - invalid/incomplete request
         401:
           description: UNAUTHORIZED - no/invalid role/authorization
+        404:
+          description: NOT FOUND - agency with the provided tenant id does not exist
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -414,8 +376,7 @@ components:
           $ref: '#/components/schemas/HalLink'
         agencypostcodes:
           $ref: '#/components/schemas/HalLink'
-        dioceses:
-          $ref: '#/components/schemas/HalLink'
+
 
     HalLink:
       type: object
@@ -468,12 +429,6 @@ components:
           minimum: 0
           maximum: 9223372036854775807
           example: 684
-        dioceseId:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 9223372036854775807
-          example: 684
         name:
           type: string
           maxLength: 100
@@ -491,16 +446,12 @@ components:
           type: string
           maxLength: 100
           example: "Bonn"
-        teamAgency:
-          type: boolean
-          example: false
         offline:
           type: boolean
           example: false
         consultingType:
           type: integer
           minimum: 0
-          maximum: 127
           example: 1
         url:
           type: string
@@ -509,6 +460,12 @@ components:
         external:
           type: boolean
           example: false
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicDTO'
+        demographics:
+          $ref: '#/components/schemas/DemographicsDTO'
         createDate:
           type: string
           example: "2019-08-23T08:52:05"
@@ -518,6 +475,61 @@ components:
         deleteDate:
           type: string
           example: "2020-09-02T15:53:23"
+        counsellingRelations:
+          type: array
+          items:
+            type: string
+            enum: [ RELATIVE_COUNSELLING, SELF_COUNSELLING, PARENTAL_COUNSELLING ]
+        tenantId:
+          type: integer
+          format: int64
+          example: 12
+        dataProtection:
+          $ref: '#/components/schemas/DataProtectionDTO'
+        agencyLogo:
+          type: string
+          example: "base64 encoded image"
+
+    DataProtectionDTO:
+      type: object
+      properties:
+        dataProtectionResponsibleEntity:
+          type: string
+          enum: [ AGENCY_RESPONSIBLE, ALTERNATIVE_REPRESENTATIVE, DATA_PROTECTION_OFFICER ]
+        agencyDataProtectionResponsibleContact:
+          $ref: '#/components/schemas/DataProtectionContactDTO'
+        alternativeDataProtectionRepresentativeContact:
+          $ref: '#/components/schemas/DataProtectionContactDTO'
+        dataProtectionOfficerContact:
+          $ref: '#/components/schemas/DataProtectionContactDTO'
+
+    DataProtectionContactDTO:
+      type: object
+      properties:
+        nameAndLegalForm:
+          type: string
+          example: "Max Mustermann"
+        street:
+          type: string
+          maxLength: 100
+          example: "Musterstraße 1"
+        postcode:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: "79106"
+        city:
+          type: string
+          maxLength: 100
+          example: "Freiburg"
+        phoneNumber:
+          type: string
+          maxLength: 100
+          example: "0761 123456"
+        email:
+          type: string
+          maxLength: 100
+
 
     PostcodeRangeDTO:
       type: object
@@ -526,53 +538,13 @@ components:
           type: string
           example: "79106-79386;88682;97051-97111"
 
-    DioceseAdminResultDTO:
-      type: object
-      properties:
-        _embedded:
-          type: array
-          items:
-            $ref: '#/components/schemas/DioceseResponseDTO'
-        _links:
-          $ref: '#/components/schemas/PaginationLinks'
-        total:
-          type: integer
-
-    DioceseResponseDTO:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 9223372036854775807
-          example: 12
-        name:
-          type: string
-          maxLength: 100
-          example: "Freiburg"
-        createDate:
-          type: string
-          example: "2019-08-23T08:52:05"
-        updateDate:
-          type: string
-          example: "2019-12-02T13:12:08"
-
     AgencyDTO:
       type: object
       required:
-        - dioceseId
         - name
-        - teamAgency
         - consultingType
         - external
       properties:
-        dioceseId:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 9223372036854775807
-          example: 12
         name:
           type: string
           maxLength: 100
@@ -590,13 +562,9 @@ components:
           type: string
           maxLength: 100
           example: "Muenchen"
-        teamAgency:
-          type: boolean
-          example: false
         consultingType:
           type: integer
           minimum: 0
-          maximum: 127
           example: 1
         url:
           type: string
@@ -615,7 +583,17 @@ components:
           type: integer
           format: int64
           example: 12
-
+        counsellingRelations:
+          type: array
+          items:
+            type: string
+            enum: [ RELATIVE_COUNSELLING, SELF_COUNSELLING, PARENTAL_COUNSELLING]
+        dataProtection:
+          type: object
+          $ref: '#/components/schemas/DataProtectionDTO'
+        agencyLogo:
+          type: string
+          example: "base64 encoded image"
 
     AgencyAdminFullResponseDTO:
       type: object
@@ -628,17 +606,10 @@ components:
     UpdateAgencyDTO:
       type: object
       required:
-        - dioceseId
         - name
         - offline
         - external
       properties:
-        dioceseId:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 9223372036854775807
-          example: 12
         name:
           type: string
           example: "Beratungsstelle"
@@ -648,6 +619,11 @@ components:
           type: string
           example: "Beschreibung Beratungsstelle..."
           maxLength: 10000
+        consultingType:
+          type: integer
+          minimum: 0
+          maximum: 127
+          example: 1
         postcode:
           type: string
           minLength: 5
@@ -673,6 +649,17 @@ components:
             type: long
         demographics:
           $ref: '#/components/schemas/DemographicsDTO'
+        counsellingRelations:
+          type: array
+          items:
+            type: string
+            enum: [ RELATIVE_COUNSELLING, SELF_COUNSELLING, PARENTAL_COUNSELLING ]
+        dataProtection:
+          type: object
+          $ref: '#/components/schemas/DataProtectionDTO'
+        agencyLogo:
+          type: string
+          example: "base64 encoded image"
 
     DemographicsDTO:
       type: object
@@ -723,17 +710,6 @@ components:
           type: string
           example: "79106-79386;88682;97051-97111"
 
-    AgencyTypeRequestDTO:
-      type: object
-      required:
-        - agencyType
-      properties:
-        agencyType:
-          type: string
-          enum:
-            - 'TEAM_AGENCY'
-            - 'DEFAULT_AGENCY'
-
     PaginationLinks:
       type: object
       required:
@@ -779,13 +755,12 @@ components:
       properties:
         field:
           type: string
-          example: 'name|description|postcode|city|teamAgency|offline'
+          example: 'name|description|postcode|city|offline'
           enum:
             - 'name'
             - 'description'
             - 'postCode'
             - 'city'
-            - 'teamAgency'
             - 'offline'
         order:
           type: string

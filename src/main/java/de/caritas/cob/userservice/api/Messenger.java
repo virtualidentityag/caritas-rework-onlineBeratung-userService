@@ -4,8 +4,6 @@ import static java.util.Objects.isNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.model.Chat;
-import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
@@ -138,17 +136,13 @@ public class Messenger implements Messaging {
         consultantRepository.findByRocketChatIdAndDeleteDateIsNull(chatUserId).orElseThrow();
     var removedOrIgnored = new AtomicBoolean(true);
 
-    if (!session.isAdvisedBy(consultant) && !isResponsible(session, consultant)) {
+    if (!session.isAdvisedBy(consultant)) {
       if (isInChat(chatId, chatUserId)) {
         removedOrIgnored.set(messageClient.removeUserFromSession(chatUserId, chatId));
       }
     }
 
     return removedOrIgnored.get();
-  }
-
-  private boolean isResponsible(Session session, Consultant consultant) {
-    return session.isTeamSession() && consultant.isInAgency(session.getAgencyId());
   }
 
   public boolean isInChat(String chatId, String chatUserId) {

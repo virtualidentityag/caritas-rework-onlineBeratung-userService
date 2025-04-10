@@ -55,17 +55,6 @@ class ChatRepositoryIT {
   }
 
   @Test
-  @Sql(value = "/database/chatAndRelationData.sql")
-  void findByUserId_Should_FindAllChatWithChatAgencyRelation() {
-    String userId = "017cac2a-2086-47eb-9f8e-40547dfa2fd5";
-
-    var chats = underTest.findByUserId(userId);
-
-    assertEquals(1, chats.size());
-    assertEquals(2, chats.get(0).getId());
-  }
-
-  @Test
   void saveShouldSaveChat() {
     givenAConsultant();
     givenAValidChat();

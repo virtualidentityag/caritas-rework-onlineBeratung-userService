@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.facade.userdata;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_KREUZBUND;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_SUCHT;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_AIDS;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GRANTED_AUTHORIZATION_USER;
@@ -156,6 +155,7 @@ class AskerDataProviderTest {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.toString()));
     when(consultingTypeManager.getAllConsultingTypeIds())
         .thenReturn(IntStream.range(0, 22).boxed().collect(Collectors.toList()));
+
     UserDataResponseDTO result = askerDataProvider.retrieveData(USER_WITH_SESSIONS);
 
     assertEquals(USER_WITH_SESSIONS.getUserId(), result.getUserId());
@@ -163,7 +163,6 @@ class AskerDataProviderTest {
     assertEquals(USER_WITH_SESSIONS.getEmail(), result.getEmail());
     assertEquals(USER_WITH_SESSIONS.isLanguageFormal(), result.isFormalLanguage());
     assertFalse(result.isAbsent());
-    assertEquals(CONSULTANT_WITH_AGENCY.isTeamConsultant(), result.isInTeamAgency());
     assertEquals(
         GRANTED_AUTHORIZATION_USER,
         result.getGrantedAuthorities().stream().findFirst().orElse(null));
@@ -180,7 +179,6 @@ class AskerDataProviderTest {
         (LinkedHashMap<String, Object>)
             result.getConsultingTypes().get(String.valueOf(CONSULTING_TYPE_ID_AIDS));
     assertFalse((boolean) consultingTypeOtherEntry.get("isRegistered"));
-    assertFalse(result.isHasAnonymousConversations());
     assertFalse(result.isHasArchive());
   }
 
