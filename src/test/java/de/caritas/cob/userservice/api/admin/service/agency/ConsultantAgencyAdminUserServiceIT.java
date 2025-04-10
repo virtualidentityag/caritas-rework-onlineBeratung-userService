@@ -3,25 +3,17 @@ package de.caritas.cob.userservice.api.admin.service.agency;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.UserServiceApplication;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
@@ -41,7 +33,7 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ConsultantAgencyAdminUserServiceIT {
+class ConsultantAgencyAdminUserServiceIT {
 
   @Autowired private ConsultantAgencyAdminService consultantAgencyAdminService;
 
@@ -53,10 +45,8 @@ public class ConsultantAgencyAdminUserServiceIT {
 
   @MockBean private AgencyAdminService agencyAdminService;
 
-  @MockBean private RemoveConsultantFromRocketChatService removeConsultantFromRocketChatService;
-
   @Test
-  public void
+  void
       findConsultantAgencies_Should_returnAllConsultantAgenciesForGivenConsultantId_with_correctConsultantId() {
     var agencyAdminResponseDTO = new EasyRandom().nextObject(AgencyAdminResponseDTO.class);
     agencyAdminResponseDTO.setId(0L);
@@ -77,7 +67,7 @@ public class ConsultantAgencyAdminUserServiceIT {
   }
 
   @Test
-  public void findConsultantAgencies_Should_returnFullMappedSessionAdminDTO() {
+  void findConsultantAgencies_Should_returnFullMappedSessionAdminDTO() {
     var agencyAdminResponseDTO = new EasyRandom().nextObject(AgencyAdminResponseDTO.class);
     agencyAdminResponseDTO.setId(0L);
     when(this.agencyAdminService.retrieveAllAgencies())
@@ -94,7 +84,7 @@ public class ConsultantAgencyAdminUserServiceIT {
   }
 
   @Test
-  public void findConsultantAgencies_Should_returnEmptyResult_with_incorrectConsultantId() {
+  void findConsultantAgencies_Should_returnEmptyResult_with_incorrectConsultantId() {
     try {
       consultantAgencyAdminService.findConsultantAgencies("12345678-1234-1234-1234-1234567890ab");
       fail("There was no BadRequestException");
@@ -107,58 +97,8 @@ public class ConsultantAgencyAdminUserServiceIT {
   }
 
   @Test
-  public void
-      markAllAssignedConsultantsAsTeamConsultant_Should_markAssignedConsultantsAsTeamConsultant() {
-    long teamCosnultantsBefore =
-        this.consultantRepository
-            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
-            .stream()
-            .filter(Consultant::isTeamConsultant)
-            .count();
-
-    this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(1L);
-
-    long teamConsultantsAfter =
-        this.consultantRepository
-            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
-            .stream()
-            .filter(Consultant::isTeamConsultant)
-            .count();
-
-    assertThat(teamConsultantsAfter, is(not(teamCosnultantsBefore)));
-    assertThat(teamConsultantsAfter, is(greaterThan(teamCosnultantsBefore)));
-  }
-
-  @Test
-  public void
-      removeConsultantsFromTeamSessionsByAgencyId_Should_removeTeamConsultantFlagAndCallServices() {
-    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().teamAgency(false));
-
-    long teamCosnultantsBefore =
-        this.consultantRepository
-            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(0L))
-            .stream()
-            .filter(Consultant::isTeamConsultant)
-            .count();
-
-    this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(0L);
-
-    long teamConsultantsAfter =
-        this.consultantRepository
-            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(0L))
-            .stream()
-            .filter(Consultant::isTeamConsultant)
-            .count();
-
-    assertThat(teamConsultantsAfter, is(not(teamCosnultantsBefore)));
-    assertThat(teamConsultantsAfter, is(lessThan(teamCosnultantsBefore)));
-    verify(this.removeConsultantFromRocketChatService, times(1))
-        .removeConsultantFromSessions(any());
-  }
-
-  @Test
-  public void
-      markConsultantAgencyForDeletion_Should_setDeletedFlagIndatabase_When_consultantAgencyCanBeDeleted() {
+  void
+      markConsultantAgencyForDeletion_Should_setDeletedFlagInDatabase_When_consultantAgencyCanBeDeleted() {
     ConsultantAgency validRelation = this.consultantAgencyRepository.findAll().iterator().next();
     String consultantId = validRelation.getConsultant().getId();
     Long agencyId = validRelation.getAgencyId();
@@ -171,7 +111,7 @@ public class ConsultantAgencyAdminUserServiceIT {
   }
 
   @Test
-  public void markConsultantAgenciesForDeletionShouldMark() {
+  void markConsultantAgenciesForDeletionShouldMark() {
     var consultant =
         consultantRepository.findById("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe").orElseThrow();
     var consultantAgencies = consultant.getConsultantAgencies();
@@ -196,11 +136,10 @@ public class ConsultantAgencyAdminUserServiceIT {
   }
 
   @Test
-  public void
-      findConsultantsForAgency_Should_returnExpectedConsultants_When_agencyHasConsultatns() {
-    var consultantsOfAgency = this.consultantAgencyAdminService.findConsultantsForAgency(1L);
+  void findConsultantsForAgency_Should_returnExpectedConsultants_When_agencyHasConsultants() {
+    var consultantsOfAgency = this.consultantAgencyAdminService.findConsultantsForAgency(0L);
 
-    assertThat(consultantsOfAgency.getEmbedded(), hasSize(4));
+    assertThat(consultantsOfAgency.getEmbedded(), hasSize(3));
     consultantsOfAgency
         .getEmbedded()
         .forEach(
@@ -216,7 +155,7 @@ public class ConsultantAgencyAdminUserServiceIT {
   }
 
   @Test
-  public void appendAgenciesForConsultants_Should_enrichConsultants_When_consultantHasAgencies() {
+  void appendAgenciesForConsultants_Should_enrichConsultants_When_consultantHasAgencies() {
     var persistedConsultant = consultantRepository.findAll().iterator().next();
     var consultantDTO =
         de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder

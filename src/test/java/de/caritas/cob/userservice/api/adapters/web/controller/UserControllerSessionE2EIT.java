@@ -503,29 +503,6 @@ class UserControllerSessionE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void getSessionsForAuthenticatedConsultantShouldNotReturnTeamSessions() throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenATeamSessionOfAColleagueInProgress();
-    givenAnEmptyRocketChatGetSubscriptionsResponse();
-    givenAValidRocketChatGetRoomsResponse(null, null, "A message");
-
-    mockMvc
-        .perform(
-            get("/users/sessions/consultants")
-                .queryParam("status", "2")
-                .queryParam("count", "15")
-                .queryParam("filter", "all")
-                .queryParam("offset", "0")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
-  }
-
-  @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
   void getSessionsForAuthenticatedUserShouldReturnSessionsLastMessageTypeE2eeActivated()
       throws Exception {
@@ -851,34 +828,6 @@ class UserControllerSessionE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotInChat(CapturedOutput logOutput)
-      throws Exception {
-    givenAValidConsultant(true);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatInfoUserResponse();
-    givenAValidSession();
-    givenOnlyEmptyRocketChatGroupMemberResponses();
-    givenKeycloakUserRoles(consultant.getId(), "consultant");
-
-    mockMvc
-        .perform(
-            delete(
-                    "/users/sessions/{sessionId}/consultant/{consultantId}",
-                    session.getId(),
-                    consultant.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
-
-    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
-    verifyRocketChatUserRemovedFromGroup(
-        logOutput, session.getGroupId(), session.getConsultant().getRocketChatId(), 0);
-    verifyRocketChatTechUserLeftGroup(logOutput, session.getGroupId(), 0);
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotTeaming(CapturedOutput logOutput)
       throws Exception {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
@@ -1252,27 +1201,6 @@ class UserControllerSessionE2EIT {
             .orElseThrow();
   }
 
-  private void givenATeamSessionOfAColleagueInProgress() {
-    session = new Session();
-    session.setUser(user);
-    session.setConsultant(
-        StreamSupport.stream(consultantRepository.findAll().spliterator(), false)
-            .filter(c -> !c.getId().equals(consultant.getId()))
-            .findFirst()
-            .orElseThrow());
-    session.setConsultingTypeId(1);
-    session.setRegistrationType(RegistrationType.REGISTERED);
-    session.setLanguageCode(LanguageCode.de);
-    session.setPostcode(RandomStringUtils.randomNumeric(5));
-    session.setAgencyId(consultant.getConsultantAgencies().iterator().next().getAgencyId());
-    session.setStatus(SessionStatus.IN_PROGRESS);
-    session.setTeamSession(true);
-    session.setIsConsultantDirectlySet(false);
-
-    sessionRepository.save(session);
-    deleteSession = true;
-  }
-
   private void givenASessionInProgress() {
     session = new Session();
     session.setUser(user);
@@ -1283,7 +1211,6 @@ class UserControllerSessionE2EIT {
     session.setPostcode(RandomStringUtils.randomNumeric(5));
     session.setAgencyId(consultant.getConsultantAgencies().iterator().next().getAgencyId());
     session.setStatus(SessionStatus.IN_PROGRESS);
-    session.setTeamSession(false);
     session.setCreateDate(LocalDateTime.now());
     session.setGroupId(RandomStringUtils.randomAlphabetic(17));
     session.setIsConsultantDirectlySet(false);

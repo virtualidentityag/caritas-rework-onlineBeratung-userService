@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
@@ -24,19 +23,8 @@ class KeycloakUserDataProviderTest {
   @InjectMocks KeycloakUserDataProvider keycloakUserDataProvider;
 
   @Test
-  void retrieveData_Should_ThrowExceptionIfCalledInAnonymousUserContext() {
-    // given
-    Mockito.when(authenticatedUser.isAnonymous()).thenReturn(true);
-    // when, then
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> keycloakUserDataProvider.retrieveAuthenticatedUserData());
-  }
-
-  @Test
   void retrieveData_Should_CallKeycloakAndFindExactlyOneUser() {
     // given
-    Mockito.when(authenticatedUser.isAnonymous()).thenReturn(false);
     Mockito.when(authenticatedUser.getUserId()).thenReturn("userId");
     UserRepresentation userRepresentation = giveUserRepresentation();
     Mockito.when(keycloakService.getById("userId")).thenReturn(userRepresentation);
@@ -58,8 +46,6 @@ class KeycloakUserDataProviderTest {
   private void assertOtherDtoAttributesSetToDefaults(UserDataResponseDTO userDataResponseDTO) {
     assertThat(userDataResponseDTO.getEncourage2fa()).isFalse();
     assertThat(userDataResponseDTO.getAbsenceMessage()).isEmpty();
-    assertThat(userDataResponseDTO.isInTeamAgency()).isFalse();
-    assertThat(userDataResponseDTO.isHasAnonymousConversations()).isFalse();
     assertThat(userDataResponseDTO.isHasArchive()).isFalse();
     assertThat(userDataResponseDTO.getAgencies()).isEmpty();
   }

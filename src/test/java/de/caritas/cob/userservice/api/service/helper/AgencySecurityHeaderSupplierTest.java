@@ -6,7 +6,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID_
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,10 +37,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class AgencySecurityHeaderSupplierTest {
 
-  private final String GET_AGENCY_METHOD_NAME = "getAgency";
-  private final String GET_AGENCIES_METHOD_NAME = "getAgencies";
-  private final Class<?>[] GET_AGENCY_METHOD_PARAMS = new Class[] {Long.class};
-  private final Class<?>[] GET_AGENCIES_METHOD_PARAMS = new Class[] {List.class};
+  private static final String GET_AGENCY_METHOD_NAME = "getAgency";
+  private static final String GET_AGENCIES_METHOD_NAME = "getAgencies";
+  private static final Class<?>[] GET_AGENCY_METHOD_PARAMS = new Class[] {Long.class};
+  private static final Class<?>[] GET_AGENCIES_METHOD_PARAMS = new Class[] {List.class};
 
   @InjectMocks private AgencyService agencyService;
 
@@ -56,7 +55,7 @@ class AgencySecurityHeaderSupplierTest {
   @Mock private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @BeforeEach
-  void setup() throws NoSuchFieldException, SecurityException {
+  void setup() throws SecurityException {
     when(agencyServiceApiControllerFactory.createControllerApi()).thenReturn(agencyControllerApi);
     this.agencyResponseDTOS =
         AGENCY_DTO_LIST.stream().map(this::toAgencyResponseDTO).collect(Collectors.toList());
@@ -85,14 +84,9 @@ class AgencySecurityHeaderSupplierTest {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
-  void test_Should_Fail_When_MethodgetAgenciesFromAgencyServiceDoesNotHaveCacheableAnnotation()
+  void test_Should_Fail_When_MethodGetAgenciesFromAgencyServiceDoesNotHaveCacheableAnnotation()
       throws NoSuchMethodException, SecurityException {
 
-    AgencyService agencyService =
-        new AgencyService(
-            mock(SecurityHeaderSupplier.class),
-            mock(TenantHeaderSupplier.class),
-            mock(AgencyServiceApiControllerFactory.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest =
         classToTest.getMethod(GET_AGENCIES_METHOD_NAME, GET_AGENCIES_METHOD_PARAMS);
@@ -113,14 +107,9 @@ class AgencySecurityHeaderSupplierTest {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
-  void test_Should_Fail_When_MethodgetAgencyFromAgencyServiceDoesNotHaveCacheableAnnotation()
+  void test_Should_Fail_When_MethodGetAgencyFromAgencyServiceDoesNotHaveCacheableAnnotation()
       throws NoSuchMethodException, SecurityException {
 
-    AgencyService agencyService =
-        new AgencyService(
-            mock(SecurityHeaderSupplier.class),
-            mock(TenantHeaderSupplier.class),
-            mock(AgencyServiceApiControllerFactory.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest.getMethod(GET_AGENCY_METHOD_NAME, GET_AGENCY_METHOD_PARAMS);
     Cacheable annotation = methodToTest.getAnnotation(Cacheable.class);

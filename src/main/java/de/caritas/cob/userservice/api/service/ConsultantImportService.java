@@ -63,7 +63,6 @@ public class ConsultantImportService {
   private static final String AGENCY_ROLE_DELIMITER = ";";
   private static final String YES = "ja";
   private static final boolean FORMAL_LANGUAGE_DEFAULT = true;
-  private static final boolean TEAM_CONSULTANT_DEFAULT = false;
   private static final String NEWLINE_CHAR = "\r\n";
   private String protocolFile;
 
@@ -156,10 +155,6 @@ public class ConsultantImportService {
           }
 
           formalLanguageList.add(extendedConsultingTypeResponseDTO.getLanguageFormal());
-
-          if (isTrue(agency.getTeamAgency())) {
-            importRecord.setTeamConsultant(true);
-          }
         }
 
         if (formalLanguageList.size() == 1) {
@@ -336,6 +331,5 @@ public class ConsultantImportService {
     String absenceMessage;
     String agenciesAndRoleSets;
     boolean formalLanguage = FORMAL_LANGUAGE_DEFAULT;
-    boolean isTeamConsultant = TEAM_CONSULTANT_DEFAULT;
   }
 }

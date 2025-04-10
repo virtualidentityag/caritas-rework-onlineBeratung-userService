@@ -140,19 +140,6 @@ class ConsultantSessionListServiceTest {
     }
   }
 
-  @Test
-  void
-      retrieveSessionsForAuthenticatedConsultant_Should_returnEmptyList_When_SessionStatusIsInitial() {
-    SessionListQueryParameter sessionListQueryParameter =
-        createStandardSessionListQueryParameterObject(0);
-
-    List<ConsultantSessionResponseDTO> result =
-        consultantSessionListService.retrieveTeamSessionsForAuthenticatedConsultant(
-            CONSULTANT, RC_TOKEN, sessionListQueryParameter);
-
-    assertEquals(0, result.size());
-  }
-
   private SessionListQueryParameter createStandardSessionListQueryParameterObject(
       int sessionStatus) {
     return SessionListQueryParameter.builder()

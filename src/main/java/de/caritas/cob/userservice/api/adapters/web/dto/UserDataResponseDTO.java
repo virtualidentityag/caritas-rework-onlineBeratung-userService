@@ -51,20 +51,16 @@ public class UserDataResponseDTO {
   @ApiModelProperty(example = "Bin mal weg...", position = 8)
   private String absenceMessage;
 
-  @ApiModelProperty(example = "true", position = 9)
-  private boolean isInTeamAgency;
-
-  @ApiModelProperty(position = 10)
+  @ApiModelProperty(position = 9)
   private List<AgencyDTO> agencies;
 
-  @ApiModelProperty(position = 11)
+  @ApiModelProperty(position = 10)
   private Set<String> userRoles;
 
-  @ApiModelProperty(position = 12)
+  @ApiModelProperty(position = 11)
   private Set<String> grantedAuthorities;
 
   private LinkedHashMap<String, Object> consultingTypes;
-  private boolean hasAnonymousConversations;
   private boolean hasArchive;
   private TwoFactorAuthDTO twoFactorAuth;
   private String displayName;

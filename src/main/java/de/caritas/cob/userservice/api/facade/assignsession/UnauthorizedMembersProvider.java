@@ -73,7 +73,6 @@ public class UnauthorizedMembersProvider {
     List<String> authorizedMembers = new ArrayList<>();
     addConsultantAndAskerOfSession(session, consultant, authorizedMembers);
     addTechnicalUsers(authorizedMembers);
-    addTeamConsultantsIfNecessary(rcGroupId, session, authorizedMembers);
 
     return authorizedMembers;
   }
@@ -91,25 +90,5 @@ public class UnauthorizedMembersProvider {
       throw new InternalServerErrorException("Rocket.Chat technical user not initialized.");
     }
     authorizedMembers.add(rocketChatSystemUserId);
-  }
-
-  private void addTeamConsultantsIfNecessary(
-      String rcGroupId, Session session, List<String> authorizedMembers) {
-    List<Consultant> consultantsOfAgency =
-        consultantService.findConsultantsByAgencyId(session.getAgencyId());
-    addTeamConsultantsIfTeamSession(session, authorizedMembers, consultantsOfAgency);
-  }
-
-  private void addTeamConsultantsIfTeamSession(
-      Session session, List<String> authorizedMembers, List<Consultant> consultantsOfAgency) {
-    if (session.isTeamSession()) {
-      consultantsOfAgency.stream()
-          .filter(Consultant::isTeamConsultant)
-          .map(Consultant::getRocketChatId)
-          .filter(
-              rocketChatId ->
-                  !rocketChatId.equalsIgnoreCase(session.getConsultant().getRocketChatId()))
-          .forEach(authorizedMembers::add);
-    }
   }
 }

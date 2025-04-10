@@ -58,8 +58,6 @@ components:
           type: integer
           format: int64
           example: 1
-        isTeamSession:
-          type: boolean
         postcode:
           type: string
           example: 88999

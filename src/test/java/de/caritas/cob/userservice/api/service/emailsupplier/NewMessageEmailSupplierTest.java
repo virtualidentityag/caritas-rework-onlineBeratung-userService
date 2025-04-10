@@ -3,11 +3,9 @@ package de.caritas.cob.userservice.api.service.emailsupplier;
 import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier.TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER;
 import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_AGENCY_2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_ENCODED;
-import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -15,7 +13,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,10 +32,6 @@ import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleServic
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.tenant.TenantData;
 import de.caritas.cob.userservice.api.testHelper.TestLogAppender;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NewMessageDTO;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.TeamSessionsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -163,7 +156,7 @@ class NewMessageEmailSupplierTest {
   }
 
   @Test
-  void generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsNoTeamSession() {
+  void generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUser() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     User user = mock(User.class);
     when(user.getUserId()).thenReturn(USER.getUserId());
@@ -180,41 +173,6 @@ class NewMessageEmailSupplierTest {
     assertThat(generatedMail.getEmail(), is("email@email.com"));
     assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
     assertThat(generatedMail.getDialect(), is(CONSULTANT.getDialect()));
-    List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
-    assertThat(templateData, hasSize(3));
-    assertThat(templateData.get(0).getKey(), is("name"));
-    assertThat(templateData.get(0).getValue(), is("vorname nachname"));
-    assertThat(templateData.get(1).getKey(), is("plz"));
-    assertThat(templateData.get(1).getValue(), is("1234"));
-    assertThat(templateData.get(2).getKey(), is("url"));
-    assertThat(templateData.get(2).getValue(), is("app baseurl"));
-  }
-
-  @Test
-  void generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsTeamSession() {
-    ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
-    NewMessageDTO newMessageDTO = new NewMessageDTO().allTeamConsultants(true);
-    TeamSessionsDTO teamSessionsDTO = new TeamSessionsDTO().newMessage(newMessageDTO);
-    NotificationsDTO notificationsDTO = new NotificationsDTO().teamSessions(teamSessionsDTO);
-    when(settings.getNotifications()).thenReturn(notificationsDTO);
-    when(consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
-    when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
-    when(session.isTeamSession()).thenReturn(true);
-    User user = mock(User.class);
-    when(user.getUserId()).thenReturn(USER.getUserId());
-    when(session.getUser()).thenReturn(user);
-    when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
-    when(session.getPostcode()).thenReturn("1234");
-    when(consultantAgencyService.findConsultantsByAgencyId(any()))
-        .thenReturn(asList(CONSULTANT_AGENCY_2, CONSULTANT_AGENCY_2));
-
-    List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
-
-    assertThat(generatedMails, hasSize(2));
-    MailDTO generatedMail = generatedMails.get(0);
-    assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT));
-    assertThat(generatedMail.getEmail(), is("email@email.com"));
-    assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("name"));

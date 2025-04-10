@@ -16,7 +16,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -101,7 +100,7 @@ class CreateSessionFacadeTest {
           when(sessionService.getSessionsForUserId(USER_ID))
               .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
           when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(AGENCY_DTO_U25);
-          when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
+          when(sessionService.initializeSession(any(), any()))
               .thenThrow(new InternalServerErrorException(MESSAGE));
 
           createSessionFacade.createUserSession(
@@ -121,7 +120,7 @@ class CreateSessionFacadeTest {
           when(sessionService.getSessionsForUserId(USER_ID))
               .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
           when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(AGENCY_DTO_U25);
-          when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
+          when(sessionService.initializeSession(any(), any()))
               .thenThrow(new InternalServerErrorException(MESSAGE));
           doThrow(INTERNAL_SERVER_ERROR_EXCEPTION)
               .when(sessionDataService)
@@ -157,8 +156,7 @@ class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
-        .thenReturn(SESSION_WITHOUT_CONSULTANT);
+    when(sessionService.initializeSession(any(), any())).thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result =
         createSessionFacade.createUserSession(
@@ -173,8 +171,7 @@ class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
-        .thenReturn(SESSION_WITHOUT_CONSULTANT);
+    when(sessionService.initializeSession(any(), any())).thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result =
         createSessionFacade.createUserSession(
@@ -209,8 +206,7 @@ class CreateSessionFacadeTest {
     when(agencyVerifier.getVerifiedAgency(anyLong(), anyInt())).thenReturn(agencyDTO);
     when(sessionService.findSessionByConsultantAndUserAndConsultingType(any(), any(), any()))
         .thenReturn(Optional.empty());
-    when(sessionService.initializeDirectSession(any(), any(), any(), anyBoolean()))
-        .thenReturn(session);
+    when(sessionService.initializeDirectSession(any(), any(), any())).thenReturn(session);
 
     var result =
         createSessionFacade.createDirectUserSession(
@@ -228,8 +224,7 @@ class CreateSessionFacadeTest {
     when(agencyVerifier.getVerifiedAgency(anyLong(), anyInt())).thenReturn(agencyDTO);
     when(sessionService.findSessionByConsultantAndUserAndConsultingType(any(), any(), any()))
         .thenReturn(Optional.empty());
-    when(sessionService.initializeDirectSession(any(), any(), any(), anyBoolean()))
-        .thenReturn(session);
+    when(sessionService.initializeDirectSession(any(), any(), any())).thenReturn(session);
     var consultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     consultingTypeResponseDTO.id(session.getConsultingTypeId() + 1);
 

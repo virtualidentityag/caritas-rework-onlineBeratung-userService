@@ -143,11 +143,9 @@ public class SessionService {
    * @param userDto the dto of the user
    * @return the initialized session
    */
-  public Session initializeDirectSession(
-      Consultant consultant, User user, UserDTO userDto, boolean isTeamSession) {
+  public Session initializeDirectSession(Consultant consultant, User user, UserDTO userDto) {
     var session =
-        initializeSession(
-            user, userDto, isTeamSession, RegistrationType.REGISTERED, SessionStatus.INITIAL);
+        initializeSession(user, userDto, RegistrationType.REGISTERED, SessionStatus.INITIAL);
     session.setConsultant(consultant);
     return saveSession(session);
   }
@@ -159,9 +157,8 @@ public class SessionService {
    * @param userDto the dto of the user
    * @return the initialized session
    */
-  public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession) {
-    return initializeSession(
-        user, userDto, isTeamSession, RegistrationType.REGISTERED, SessionStatus.INITIAL);
+  public Session initializeSession(User user, UserDTO userDto) {
+    return initializeSession(user, userDto, RegistrationType.REGISTERED, SessionStatus.INITIAL);
   }
 
   /**
@@ -169,17 +166,12 @@ public class SessionService {
    *
    * @param user {@link User}
    * @param userDto {@link UserDTO}
-   * @param isTeamSession is team session flag
    * @param registrationType {@link RegistrationType}
    * @param sessionStatus {@link SessionStatus}
    * @return the initialized {@link Session}
    */
   public Session initializeSession(
-      User user,
-      UserDTO userDto,
-      boolean isTeamSession,
-      RegistrationType registrationType,
-      SessionStatus sessionStatus) {
+      User user, UserDTO userDto, RegistrationType registrationType, SessionStatus sessionStatus) {
     var extendedConsultingTypeResponseDTO = obtainConsultingTypeSettings(userDto);
 
     var session =
@@ -191,7 +183,6 @@ public class SessionService {
             .agencyId(userDto.getAgencyId())
             .languageCode(LanguageCode.de)
             .status(sessionStatus)
-            .teamSession(isTeamSession)
             .createDate(nowInUtc())
             .updateDate(nowInUtc())
             .mainTopicId(userDto.getMainTopicId())
@@ -247,33 +238,6 @@ public class SessionService {
    */
   public Session saveSession(Session session) {
     return sessionRepository.save(session);
-  }
-
-  /**
-   * Returns a list of {@link ConsultantSessionResponseDTO} containing team sessions excluding
-   * sessions which are taken by the consultant.
-   *
-   * @param consultant the consultant
-   * @return A list of {@link ConsultantSessionResponseDTO}
-   */
-  public List<ConsultantSessionResponseDTO> getTeamSessionsForConsultant(Consultant consultant) {
-
-    List<Session> sessions = null;
-
-    Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
-    if (nonNull(consultantAgencies)) {
-      List<Long> consultantAgencyIds =
-          consultantAgencies.stream()
-              .map(ConsultantAgency::getAgencyId)
-              .collect(Collectors.toList());
-
-      sessions =
-          sessionRepository
-              .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-                  consultantAgencyIds, consultant, SessionStatus.IN_PROGRESS, true);
-    }
-
-    return mapSessionsToConsultantSessionDto(sessions);
   }
 
   /**
@@ -487,7 +451,6 @@ public class SessionService {
 
   private void checkForAskerRoles(Set<String> roles) {
     if (!roles.contains(UserRole.USER.getValue())
-        && !roles.contains(UserRole.ANONYMOUS.getValue())
         && !roles.contains(UserRole.CONSULTANT.getValue())) {
       throw new ForbiddenException(
           "No user or consultant role to retrieve sessions", LogService::logForbidden);
@@ -495,10 +458,7 @@ public class SessionService {
   }
 
   private void checkAskerPermissionForSession(Session session, String userId, Set<String> roles) {
-    if ((roles.contains(UserRole.USER.getValue())
-            || session.getRegistrationType() == RegistrationType.ANONYMOUS
-                && roles.contains(UserRole.ANONYMOUS.getValue()))
-        && session.getUser().getUserId().equals(userId)) {
+    if (roles.contains(UserRole.USER.getValue()) && session.getUser().getUserId().equals(userId)) {
       return;
     }
     throw new ForbiddenException(
@@ -533,9 +493,7 @@ public class SessionService {
   }
 
   private void checkConsultantAssignment(Consultant consultant, Session session) {
-    if (session.isAdvisedBy(consultant)
-        || isAllowedToAdvise(consultant, session)
-        || isAnonymousEnquiryAndAllowedToAdviseConsultingType(consultant, session)) {
+    if (session.isAdvisedBy(consultant) || isAllowedToAdvise(consultant, session)) {
       return;
     }
     throw new ForbiddenException(
@@ -544,26 +502,9 @@ public class SessionService {
   }
 
   private boolean isAllowedToAdvise(Consultant consultant, Session session) {
-    return isTeamSessionOrNew(session)
+    return isNew(session)
         && session.getAgencyId() != null
         && consultant.isInAgency(session.getAgencyId());
-  }
-
-  private boolean isAnonymousEnquiryAndAllowedToAdviseConsultingType(
-      Consultant consultant, Session session) {
-    if (session.getStatus() != SessionStatus.NEW
-        || session.getRegistrationType() != RegistrationType.ANONYMOUS) {
-      return false;
-    }
-    var agencyIdsOfConsultant =
-        consultant.getConsultantAgencies().stream()
-            .map(ConsultantAgency::getAgencyId)
-            .collect(Collectors.toList());
-    var consultingTypes =
-        agencyService.getAgencies(agencyIdsOfConsultant).stream()
-            .map(AgencyDTO::getConsultingType)
-            .collect(Collectors.toSet());
-    return consultingTypes.contains(session.getConsultingTypeId());
   }
 
   /**
@@ -584,8 +525,8 @@ public class SessionService {
     return toConsultantSessionDTO(session);
   }
 
-  private boolean isTeamSessionOrNew(Session session) {
-    return session.isTeamSession() || SessionStatus.NEW == session.getStatus();
+  private boolean isNew(Session session) {
+    return SessionStatus.NEW == session.getStatus();
   }
 
   private Consultant loadConsultantOrThrow(String userId) {
@@ -601,7 +542,6 @@ public class SessionService {
 
     var consultantSessionDTO =
         new ConsultantSessionDTO()
-            .isTeamSession(session.isTeamSession())
             .agencyId(session.getAgencyId())
             .consultingType(session.getConsultingTypeId())
             .id(session.getId())
@@ -634,8 +574,7 @@ public class SessionService {
   }
 
   private void checkPermissionForConsultantSession(Session session, Consultant consultant) {
-    if (!session.isAdvisedBy(consultant)
-        && !(session.isTeamSession() && consultant.isInAgency(session.getAgencyId()))) {
+    if (!session.isAdvisedBy(consultant)) {
       throw new ForbiddenException(
           String.format(
               "No permission for session %s by consultant %s",
@@ -659,32 +598,6 @@ public class SessionService {
   private List<Session> retrieveArchivedSessions(Consultant consultant) {
     return this.sessionRepository.findByConsultantAndStatusOrderByUpdateDateDesc(
         consultant, SessionStatus.IN_ARCHIVE);
-  }
-
-  /**
-   * Retrieves all archived team sessions of given {@link Consultant}.
-   *
-   * @param consultant the consultant
-   * @return the related {@link ConsultantSessionResponseDTO}s
-   */
-  public List<ConsultantSessionResponseDTO> getArchivedTeamSessionsForConsultant(
-      Consultant consultant) {
-    final List<Session> sessions = retrieveArchivedTeamSessionsForConsultant(consultant);
-    return mapSessionsToConsultantSessionDto(sessions);
-  }
-
-  private List<Session> retrieveArchivedTeamSessionsForConsultant(Consultant consultant) {
-    Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
-    if (isNotEmpty(consultantAgencies)) {
-      List<Long> consultantAgencyIds =
-          consultantAgencies.stream()
-              .map(ConsultantAgency::getAgencyId)
-              .collect(Collectors.toList());
-      return this.sessionRepository
-          .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionIsTrueOrderByUpdateDateDesc(
-              consultantAgencyIds, consultant, SessionStatus.IN_ARCHIVE);
-    }
-    return emptyList();
   }
 
   private List<ConsultantSessionResponseDTO> mapSessionsToConsultantSessionDto(

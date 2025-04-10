@@ -208,7 +208,7 @@ public class CreateConsultantSaga {
   private void tryAssignConsultantToExistingSessions(Consultant consultant) {
     // This is not transactional on purpose.
     // If the consultant could not be added to all existing enquiries, he can still work, without
-    // access to the enquiry, that can be picked up by another consultant from the team.
+    // access to the enquiry, that can be picked up by another consultant from the agency.
     var registeredEnquiries = sessionService.getRegisteredEnquiriesForConsultant(consultant);
     tryAssignConsultantToRocketchatGroup(consultant, registeredEnquiries);
     var archivedEnquiries = sessionService.getArchivedSessionsForConsultant(consultant);
@@ -381,7 +381,6 @@ public class CreateConsultantSaga {
         .email(consultantCreationInput.getEmail())
         .absent(isTrue(consultantCreationInput.isAbsent()))
         .absenceMessage(consultantCreationInput.getAbsenceMessage())
-        .teamConsultant(consultantCreationInput.isTeamConsultant())
         .rocketChatId(rocketChatUserId)
         .encourage2fa(true)
         .notifyEnquiriesRepeating(true)

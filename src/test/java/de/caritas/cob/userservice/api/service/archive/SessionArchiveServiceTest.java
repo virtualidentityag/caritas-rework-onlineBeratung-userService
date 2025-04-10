@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,7 +38,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 @ExtendWith(MockitoExtension.class)
-public class SessionArchiveServiceTest {
+class SessionArchiveServiceTest {
 
   @InjectMocks SessionArchiveService sessionArchiveService;
   @Mock SessionRepository sessionRepository;
@@ -65,12 +66,12 @@ public class SessionArchiveServiceTest {
   @Mock private Logger logger;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     setInternalState(SessionArchiveService.class, "log", logger);
   }
 
   @Test
-  public void archiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
+  void archiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
     assertThrows(
         NotFoundException.class,
         () -> {
@@ -114,11 +115,12 @@ public class SessionArchiveServiceTest {
   }
 
   @Test
-  public void archiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
+  void archiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
 
     Session session = Mockito.mock(Session.class);
-    when(session.isAdvised(any())).thenReturn(true);
+    when(session.isAdvisedBy(anyString())).thenReturn(true);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+    when(authenticatedUser.getUserId()).thenReturn("11");
 
     sessionArchiveService.archiveSession(SESSION_ID);
 
@@ -161,7 +163,7 @@ public class SessionArchiveServiceTest {
   }
 
   @Test
-  public void archiveSession_Should_LogButNotFail_WhenErrorDuringStatisticsArchiveOccurs() {
+  void archiveSession_Should_LogButNotFail_WhenErrorDuringStatisticsArchiveOccurs() {
 
     Session session = Mockito.mock(Session.class);
     when(session.isAdvised(any())).thenReturn(true);
@@ -185,7 +187,7 @@ public class SessionArchiveServiceTest {
   }
 
   @Test
-  public void dearchiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
+  void dearchiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
     assertThrows(
         NotFoundException.class,
         () -> {
@@ -229,8 +231,7 @@ public class SessionArchiveServiceTest {
   }
 
   @Test
-  public void
-      dearchiveSession_Should_ThrowForbiddenException_WhenSessionIsNotTeamSessionAndConsultantNotAssigned() {
+  public void dearchiveSession_Should_ThrowForbiddenException_WhenConsultantNotAssigned() {
     assertThrows(
         ForbiddenException.class,
         () -> {
@@ -244,7 +245,7 @@ public class SessionArchiveServiceTest {
   }
 
   @Test
-  public void dearchiveSession_Should_ThrowForbiddenException_WhenNoConsultantOrUserRole() {
+  void dearchiveSession_Should_ThrowForbiddenException_WhenNoConsultantOrUserRole() {
     assertThrows(
         ForbiddenException.class,
         () -> {
@@ -258,7 +259,7 @@ public class SessionArchiveServiceTest {
   }
 
   @Test
-  public void dearchiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
+  void dearchiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
     Session session = Mockito.mock(Session.class);
     when(session.isAdvised(any())).thenReturn(true);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
@@ -284,7 +285,7 @@ public class SessionArchiveServiceTest {
   }
 
   @Test
-  public void dearchiveSession_Should_ChangeStatusOfSession_WhenUserHasPermission() {
+  void dearchiveSession_Should_ChangeStatusOfSession_WhenUserHasPermission() {
 
     Session session = Mockito.mock(Session.class);
     when(session.isAdvised(any())).thenReturn(true);
