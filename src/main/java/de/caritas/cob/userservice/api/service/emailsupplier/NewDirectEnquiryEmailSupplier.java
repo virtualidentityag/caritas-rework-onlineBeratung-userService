@@ -74,7 +74,7 @@ public class NewDirectEnquiryEmailSupplier implements EmailSupplier {
         .filter(this::shouldSendNewEnquiryNotificationForConsultant)
         .map(
             consultantAgency -> {
-              log.debug(
+              log.info(
                   "Generating email for consultant {}", consultantAgency.getConsultant().getId());
               return mailOf(consultantAgency.getConsultant(), postCode);
             })
@@ -88,14 +88,14 @@ public class NewDirectEnquiryEmailSupplier implements EmailSupplier {
 
     if (!isValid) {
       if (consultant == null) {
-        log.debug(
+        log.info(
             "Cannot send email notification: consultant is null for agency {}",
             consultantAgency.getId());
       } else if (!isNotBlank(consultant.getEmail())) {
-        log.debug(
+        log.info(
             "Cannot send email notification: email is blank for consultant {}", consultant.getId());
       } else if (consultant.isAbsent()) {
-        log.debug(
+        log.info(
             "Cannot send email notification: consultant {} is marked as absent",
             consultant.getId());
       }
