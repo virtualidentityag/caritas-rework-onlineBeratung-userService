@@ -96,14 +96,14 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
       ConsultantAgency consultantAgency, Consultant consultant, boolean isValid) {
     if (!isValid) {
       if (consultant == null) {
-        log.debug(
+        log.info(
             "Cannot send email notification: consultant is null for agency {}",
             consultantAgency.getId());
       } else if (!isNotBlank(consultant.getEmail())) {
-        log.debug(
+        log.info(
             "Cannot send email notification: email is blank for consultant {}", consultant.getId());
       } else if (consultant.isAbsent()) {
-        log.debug(
+        log.info(
             "Skipping new enquiry email notification: consultant {} is marked as absent",
             consultant.getId());
       }
@@ -119,7 +119,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
     var consultant = consultantAgency.getConsultant();
     var shouldSend = wantsToReceiveNotificationsAboutNewEnquiry(consultant);
     if (shouldSend) {
-      log.debug(
+      log.info(
           "All notification checks passed for consultant {} - will generate email",
           consultant.getId());
     }
@@ -131,14 +131,14 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
         deserializeNotificationSettingsDTOOrDefaultIfNull(consultant);
     var notificationEnabled = consultant.isNotificationsEnabled();
     if (!notificationEnabled) {
-      log.debug(
+      log.info(
           "Skipping email notification: notifications are disabled for consultant {}",
           consultant.getId());
     }
     var initialEnquiryNotificationsEnabled =
         notificationsSettingsDTO.getInitialEnquiryNotificationEnabled();
     if (!initialEnquiryNotificationsEnabled) {
-      log.debug(
+      log.info(
           "Skipping email notification: initial enquiry notification setting is disabled for consultant {}",
           consultant.getId());
     }

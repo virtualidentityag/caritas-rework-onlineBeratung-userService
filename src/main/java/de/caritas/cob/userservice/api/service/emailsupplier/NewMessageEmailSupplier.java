@@ -116,7 +116,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private static boolean checkThatConsultantEmailNotEmpty(ConsultantAgency agency) {
     var isEmpty = agency.getConsultant().getEmail().isEmpty();
     if (isEmpty) {
-      log.debug(
+      log.info(
           "Skipping email notification: consultant email is empty {}",
           agency.getConsultant().getId());
     }
@@ -128,7 +128,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     if (isNewNotificationToggleEnabled()) {
       var wantsToReceiveNotifications = wantsToReceiveNotificationsAboutNewMessage(consultant);
       if (!wantsToReceiveNotifications) {
-        log.debug(
+        log.info(
             "Skipping email notification: new message notification setting is disabled for consultant {}",
             consultant.getId());
       }
@@ -137,7 +137,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
       var notifyNewChatMessageFromAdviceSeeker =
           consultant.getNotifyNewChatMessageFromAdviceSeeker();
       if (!notifyNewChatMessageFromAdviceSeeker) {
-        log.debug(
+        log.info(
             "Skipping email notification: new message notification setting is disabled for consultant {}",
             consultant.getId());
       }
@@ -219,7 +219,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     var isLoggedOut =
         !messageClient.isLoggedIn(agency.getConsultant().getRocketChatId()).orElse(false);
     if (!isLoggedOut) {
-      log.debug("Skipping send email notification for new message: consultant is logged in");
+      log.info("Skipping send email notification for new message: consultant is logged in");
     }
     return isLoggedOut;
   }
@@ -227,7 +227,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private boolean isAdviceSeekerLoggedOut() {
     var isLoggedOut = !messageClient.isLoggedIn(session.getUser().getRcUserId()).orElse(false);
     if (!isLoggedOut) {
-      log.debug("Skipping send email notification for new message: advice seeker is logged in");
+      log.info("Skipping send email notification for new message: advice seeker is logged in");
     }
     return isLoggedOut;
   }
