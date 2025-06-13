@@ -414,7 +414,7 @@ class NewMessageEmailSupplierTest {
 
     newMessageEmailSupplier.generateEmails();
 
-    assertTrue(testLogAppender.contains("Skipping email notification", Level.DEBUG));
+    assertTrue(testLogAppender.contains("Skipping email notification", Level.INFO));
   }
 
   @Test
@@ -429,7 +429,7 @@ class NewMessageEmailSupplierTest {
     assertTrue(
         testLogAppender.contains(
             "Skipping send email notification for new message: advice seeker is logged in",
-            Level.DEBUG));
+            Level.INFO));
   }
 
   @Test
@@ -446,7 +446,7 @@ class NewMessageEmailSupplierTest {
     assertTrue(
         testLogAppender.contains(
             "Skipping send email notification for new message: consultant is logged in",
-            Level.DEBUG));
+            Level.INFO));
   }
 
   private void givenCurrentTenantDataIsSet() {

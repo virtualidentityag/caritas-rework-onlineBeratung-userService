@@ -184,7 +184,7 @@ class NewEnquiryEmailSupplierTest {
     newEnquiryEmailSupplier.generateEmails();
 
     // then
-    assertTrue(testAppender.contains("consultant is null for agency", Level.DEBUG));
+    assertTrue(testAppender.contains("consultant is null for agency", Level.INFO));
   }
 
   @Test
@@ -205,7 +205,7 @@ class NewEnquiryEmailSupplierTest {
     newEnquiryEmailSupplier.generateEmails();
 
     // then
-    assertTrue(testAppender.contains("email is blank for consultant", Level.DEBUG));
+    assertTrue(testAppender.contains("email is blank for consultant", Level.INFO));
   }
 
   @Test
@@ -227,7 +227,7 @@ class NewEnquiryEmailSupplierTest {
     newEnquiryEmailSupplier.generateEmails();
 
     // then
-    assertTrue(testAppender.contains("is marked as absent", Level.DEBUG));
+    assertTrue(testAppender.contains("is marked as absent", Level.INFO));
   }
 
   @Test
@@ -250,6 +250,6 @@ class NewEnquiryEmailSupplierTest {
     newEnquiryEmailSupplier.generateEmails();
 
     // then
-    assertTrue(testAppender.contains("is marked as absent", Level.DEBUG));
+    assertTrue(testAppender.contains("is marked as absent", Level.INFO));
   }
 }
